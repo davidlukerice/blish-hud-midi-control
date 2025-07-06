@@ -1,0 +1,19 @@
+{
+  "name": "MIDI Control",
+  "version": "0.0.1",
+  "namespace": "davidlukerice.blish-hud-midi-control",
+  "package": "Blish HUD - MIDI Control.dll",
+  "manifest_version": 1,
+  "description": "Converts MIDI device messages to keypresses for playing GW2 Instruments",
+  "enabled_without_gw2": true,
+  "dependencies": {
+    "bh.blishhud": ">=0.5.2"
+  },
+  "url": "https://github.com/david/Blish_HUD___MIDI_Control",
+  "contributors": [
+    {
+      "name": "davidlukerice",
+      "url": "https://github.com/dlamkins"
+    }
+  ]
+}
