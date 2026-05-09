@@ -7,7 +7,7 @@ using System;
 using System.ComponentModel.Composition;
 using System.Threading.Tasks;
 
-namespace Blish_HUD___MIDI_Control
+namespace DavidRice.BlishHud.MidiControl
 {
     [Export(typeof(Blish_HUD.Modules.Module))]
     public class Module : Blish_HUD.Modules.Module
