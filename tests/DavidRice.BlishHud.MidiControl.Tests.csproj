@@ -58,6 +58,9 @@
     <Compile Include="Keymaps\KeymapTests.cs">
       <Link>Keymaps\KeymapTests.cs</Link>
     </Compile>
+    <Compile Include="Keymaps\BuiltIn\MinstrelAutoKeymapTests.cs">
+      <Link>Keymaps\BuiltIn\MinstrelAutoKeymapTests.cs</Link>
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Microsoft.NETFramework.ReferenceAssemblies.net48.1.0.3\build\Microsoft.NETFramework.ReferenceAssemblies.net48.targets" Condition="Exists('..\packages\Microsoft.NETFramework.ReferenceAssemblies.net48.1.0.3\build\Microsoft.NETFramework.ReferenceAssemblies.net48.targets')" />

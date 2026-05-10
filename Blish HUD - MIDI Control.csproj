@@ -66,6 +66,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="src\Keymaps\NoteDefinition.cs" />
+    <Compile Include="src\Keymaps\BuiltIn\MinstrelAutoKeymap.cs" />
     <Compile Include="Module.cs" />
   </ItemGroup>
   <ItemGroup>

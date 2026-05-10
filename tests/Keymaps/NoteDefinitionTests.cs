@@ -6,6 +6,25 @@ namespace DavidRice.BlishHud.MidiControl.Tests
     public class NoteDefinitionTests
     {
         [Test]
+        public void CanCreateWithNullKey()
+        {
+            var note = new NoteDefinition(
+                key: null,
+                forceInternalOctave: 0);
+
+            Assert.That(note.Key, Is.Null);
+            Assert.That(note.ForceInternalOctave, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void KeyDefaultsToNullWhenOmitted()
+        {
+            var note = new NoteDefinition(forceInternalOctave: 1);
+
+            Assert.That(note.Key, Is.Null);
+        }
+
+        [Test]
         public void CanCreateWithRequiredFields()
         {
             var note = new NoteDefinition(key: "1", octave: 0);
