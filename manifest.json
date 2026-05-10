@@ -9,7 +9,7 @@
   "dependencies": {
     "bh.blishhud": ">=0.5.2"
   },
-  "url": "https://github.com/davidlukerice/MidiToGameInstruments",
+  "url": "https://github.com/davidlukerice/blish-hud-midi-control",
   "contributors": [
     {
       "name": "davidlukerice",

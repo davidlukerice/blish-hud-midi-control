@@ -6,23 +6,34 @@
 - **Design grilling complete**: All architecture, data model, UI, threading, and error-handling decisions resolved.
 - **PRD published**: `docs/MIDI-Control-v1-PRD.md` (status: `ready-for-agent`).
 - **Glossary published**: `CONTEXT.md` — canonical terms. If the next agent uses different terminology, challenge them against this file.
+- **Chunk 1 complete**: `NoteDefinition` and `Keymap` domain models implemented with red/green TDD.
 
 ## Current Codebase State
 
 ```
 E:/dev/blish-hud-midi-control/
-├── Module.cs                       ← old empty scaffold, needs full rewrite
-├── manifest.json                   ← needs updates (version, url, contributors)
-├── Blish HUD - MIDI Control.csproj ← old, needs NAudio + cleanup
-├── Blish HUD - MIDI Control.sln    ← existing
-├── packages.config                 ← old packages, needs cleanup
-├── packages/                       ← stale packages committed, can be restored via NuGet
-├── README.md                       ← updated with project overview
-├── CONTEXT.md                      ← glossary and decisions
+├── Module.cs                                        ← empty scaffold, needs rewrite
+├── manifest.json                                    ← updated url and contributors
+├── Blish HUD - MIDI Control.csproj                  ← net48, LangVersion 8.0, ref assemblies wired
+├── Blish HUD - MIDI Control.sln                     ← includes test project
+├── packages.config
+├── packages/                                        ← now includes NUnit, NUnitLite, net48 ref assemblies
+├── README.md
+├── CONTEXT.md                                       ← glossary
 ├── docs/
-│   ├── MIDI-Control-v1-PRD.md      ← full PRD
-│   ├── implementation-plan.md      ← 7-phase implementation plan
-│   └── HANDOFF.md                  ← this file
+│   ├── MIDI-Control-v1-PRD.md
+│   ├── implementation-plan.md
+│   ├── HANDOFF.md                                   ← this file
+│   └── agent-instructions.md                        ← scope discipline rules
+├── src/
+│   └── Keymaps/
+│       └── NoteDefinition.cs                        ← Keymap + NoteDefinition (Chunk 1 DONE)
+├── tests/
+│   ├── DavidRice.BlishHud.MidiControl.Tests.csproj
+│   ├── Program.cs                                   ← NUnitLite entry point
+│   └── Keymaps/
+│       ├── NoteDefinitionTests.cs
+│       └── KeymapTests.cs                           ← all 8 tests pass
 ```
 
 ## Decisions Already Made (Do Not Re-litigate)
@@ -41,32 +52,35 @@ E:/dev/blish-hud-midi-control/
 | Corner icon | Active/muted states only (no note text) |
 | Focus guard | Optional setting, uses `GameService.GameIntegration.Gw2Instance.IsInGame` |
 | Tests | Unit tests for `KeySender` and `KeymapRegistry`; integration for `KeySendThread` |
+| Namespace | `DavidRice.BlishHud.MidiControl` (was `Blish_HUD___MIDI_Control`) |
+| Build | `msbuild "Blish HUD - MIDI Control.sln" -p:Configuration=Debug -p:Platform=x64` |
+| Test runner | `tests/bin/x64/Debug/DavidRice.BlishHud.MidiControl.Tests.exe --noheader` |
 
-## Source Files to Create
+## Source Files to Create (Remaining)
 
 ```
 src/
 ├── Keymaps/
-│   ├── Keymap.cs                   (data model: keymap + notedef)
-│   ├── NoteDefinition.cs           (single note mapping)
-│   └── BuiltIn/
-│       └── MinstrelAutoKeymap.cs   (ported from original TS)
+│   ├── NoteDefinition.cs                              DONE
+│   ├── BuiltIn/
+│   │   └── MinstrelAutoKeymap.cs                      (next chunk candidate)
+│   └── KeymapRegistry.cs                              (next chunk candidate)
 ├── Input/
-│   ├── MidiInputManager.cs         (NAudio lifecycle, device enum, queue)
-│   └── SendInput.cs                (P/Invoke wrapper: KeyTap, KeyUp)
+│   ├── MidiInputManager.cs                            (Phase 3 — needs NAudio)
+│   └── SendInput.cs                                   (Phase 4 — P/Invoke wrapper)
 ├── Core/
-│   ├── KeySender.cs                (octave logic, alt-octave, produces SendActions)
-│   └── KeymapRegistry.cs           (built-in + future custom json discovery)
+│   ├── KeySender.cs                                   (Phase 5)
+│   └── KeymapRegistry.cs                              (choose one location)
 └── UI/
-    └── SettingsView.cs             (custom settings panel with dropdowns + preview)
+    └── SettingsView.cs                                (Phase 6)
 ```
 
-## What to Change in Existing Files
+> **Decision needed**: `KeymapRegistry` should live under `src/Keymaps/` (data/discovery) rather than `src/Core/`. Both the implementation plan and the handoff listed it in both places — clean this up.
+
+## What to Change in Existing Files (Remaining)
 
 ### `manifest.json`
-- Fix `"url"` (currently wrong)
-- Fix `"contributors"` name/url
-- Bump `"version"` when releasing
+- `"version"` to bump when releasing
 
 ### `Module.cs`
 - Complete rewrite. Must:
@@ -77,10 +91,9 @@ src/
   - Register corner icon + keybind
 
 ### `.csproj`
-- Add NAudio
-- Remove stale packages
-- Set `Copy Local = False` on Blish HUD deps
-- Consider migrating from `packages.config` to `PackageReference`
+- Add NAudio (when MIDI code is implemented)
+- Remove stale packages (`AsyncClipboardService`)
+- (Optional) Migrate from `packages.config` to `PackageReference`
 
 ## Keymap Reference (The Minstrel Auto)
 
@@ -102,7 +115,6 @@ Key structures:
 2. **Thread safety**: `MidiInputManager` event handler runs on a background thread. All data passed to the game thread must go through `ConcurrentQueue`. Never touch Blish HUD UI state from the MIDI callback.
 3. **KeyTap vs KeyUp safety**: On unload, send key-up for all possible keys (`1-8`, `9`, `0`) to prevent stuck states. `KeySender` produces `KeyTap` actions with zero delay for normal notes.
 4. **Copy Local = False**: All Blish HUD and MonoGame references must have `Copy Local = False`. Otherwise the module DLL bloats with assemblies Blish HUD already has loaded.
-5. **Namespace**: The project uses `davidlukerice.Blish_HUD___MIDI_Control` (with triple underscores) from the generated scaffold. Consider updating to something cleaner like `DavidRice.BlishHud.MidiControl`.
 
 ## Testing Strategy (Reiterated from PRD)
 
@@ -111,6 +123,15 @@ Key structures:
 - **KeySendThread**: Integration test for enqueue/dequeue/shutdown lifecycle.
 - No unit tests for `SendInput` (hardware), `MidiInputManager` (requires MIDI device), or Blish HUD UI controls.
 
-## Unresolved Open Questions
+## Chunk History
 
-- None at architecture level. All major decisions resolved. Next session should start with Phase 1 of `docs/implementation-plan.md`.
+| # | Description | Tests | Status |
+|---|---|---|---|
+| 1 | Domain model: `NoteDefinition`, `Keymap` | 8 passing | DONE |
+
+## Next Chunk Options
+
+1. **MinstrelAutoKeymap.cs** — port the TypeScript data into a static class that returns a populated `Keymap`. Adds no new dependencies. Low risk, high value — validates the domain model against real data.
+2. **KeymapRegistry** — keys, alt-octaves, and manual shift bindings. Pure C#, unit-testable.
+
+Ask the user which to pick up first.

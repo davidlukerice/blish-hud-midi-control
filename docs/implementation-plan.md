@@ -2,18 +2,17 @@
 
 ## Phase 1 — Project Scaffold & Dependencies
 
-1. **Update project file** (`Blish HUD - MIDI Control.csproj`)
+1. **Update project file** (`Blish HUD - MIDI Control.csproj`) ✅ DONE (namespace, LangVersion 8.0, ref assemblies)
    - Retarget from .NET Framework 4.8 to the Blish HUD compatible version (already 4.8)
-   - Remove stale package references (`AsyncClipboardService`, unused SharpDX refs)
-   - Add NAudio NuGet package
+   - Remove stale package references (`AsyncClipboardService`, unused SharpDX refs) — pending
+   - Add NAudio NuGet package — pending
    - Ensure `Copy Local = False` on all Blish HUD dependencies
 
 2. **Directory structure**
    ```
    src/
    ├── Keymaps/
-   │   ├── Keymap.cs          (data model)
-   │   ├── NoteDefinition.cs  (single note mapping)
+   │   ├── Keymap.cs / NoteDefinition.cs        ✅ DONE (merged into NoteDefinition.cs)
    │   └── BuiltIn/
    │       └── MinstrelAutoKeymap.cs
    ├── Input/
@@ -49,9 +48,13 @@
 - `string? OctaveDownKey`
 - `string? OctaveUpKey`
 
+✅ **Chunk 1 implemented** — `NoteDefinition.cs` with TDD (8 tests passing)
+
 ### Built-in Keymap: Minstrel (Auto)
 
 Port the TypeScript data to a static C# class that returns a fully populated `Keymap` instance. All notes, alt-octave definitions, and octave shift bindings.
+
+→ **Recommended next chunk**
 
 ### KeymapRegistry
 
