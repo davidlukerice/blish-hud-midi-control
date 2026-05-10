@@ -11,7 +11,7 @@
 
 ```
 E:/dev/blish-hud-midi-control/
-├── Module.cs                                        ← empty scaffold, needs rewrite
+├── Module.cs                                        ← REWRITTEN: full lifecycle + settings + corner icon
 ├── manifest.json                                    ← updated url and contributors
 ├── Blish HUD - MIDI Control.csproj                  ← net48, LangVersion 8.0, ref assemblies wired
 ├── Blish HUD - MIDI Control.sln                     ← includes test project
@@ -33,7 +33,10 @@ E:/dev/blish-hud-midi-control/
 │   ├── Input/
 │   │   └── SendInput.cs                             ← Chunk 4 DONE
 │   └── Core/
-│       └── KeySendThread.cs                         ← Chunk 5 DONE
+│       ├── KeySendThread.cs                         ← Chunk 5 DONE
+│       ├── MidiInputManager.cs                      ← Chunk 6 DONE
+│       ├── MidiNoteEvent.cs                         ← Chunk 6 DONE
+│       └── MidiNote.cs                              ← Chunk 6 DONE
 └── tests/
     ├── DavidRice.BlishHud.MidiControl.Tests.csproj
     ├── Program.cs                                   ← NUnitLite entry point
@@ -46,7 +49,8 @@ E:/dev/blish-hud-midi-control/
     ├── Input/
     │   └── SendInputApiTests.cs                     ← Chunk 4
     └── Core/
-        └── KeySendThreadTests.cs                    ← Chunk 5
+        ├── KeySendThreadTests.cs                    ← Chunk 5
+        └── MidiNoteTests.cs                         ← Chunk 6
 ```
 
 ## Decisions Already Made (Do Not Re-litigate)
@@ -79,11 +83,13 @@ src/
 │   └── BuiltIn/
 │       └── MinstrelAutoKeymap.cs                      DONE
 ├── Input/
-│   ├── SendInput.cs                                   DONE
-│   └── MidiInputManager.cs                            (Phase 3 — needs NAudio)
+│   └── SendInput.cs                                   DONE
 ├── Core/
 │   ├── KeySendThread.cs                               DONE
-│   └── KeySender.cs                                   (Phase 5 — depends on KeySendThread)
+│   ├── MidiInputManager.cs                            DONE ← Chunk 6
+│   ├── MidiNoteEvent.cs                               DONE ← Chunk 6
+│   ├── MidiNote.cs                                    DONE ← Chunk 6
+│   └── KeySender.cs                                   (Phase 5 — deepest module)
 └── UI/
     └── SettingsView.cs                                (Phase 6)
 ```
@@ -96,17 +102,17 @@ src/
 - `"version"` to bump when releasing
 
 ### `Module.cs`
-- Complete rewrite. Must:
-  - `DefineSettings()` with all 6 setting entries
-  - `Initialize()` / `LoadAsync()` wiring up all subsystems
-  - `Update()` draining queue
-  - `Unload()` cleanup + unload safety (key-up flush)
-  - Register corner icon + keybind
+- ✅ Complete rewrite done. Includes:
+  - `DefineSettings()` with all 6 setting entries (device name, keymap id, sendNotes, autoSwap, shiftDelay, focusGuard)
+  - `Initialize()` → `KeymapRegistry` + `MidiInputManager`
+  - `LoadAsync()` → `KeySendThread`, corner icon, re-open saved MIDI device
+  - `Update()` → drain MIDI queue (KeySender not wired yet)
+  - `Unload()` → dispose all, safety key-up burst
 
 ### `.csproj`
-- Add NAudio (when MIDI code is implemented)
-- Remove stale packages (`AsyncClipboardService`)
-- (Optional) Migrate from `packages.config` to `PackageReference`
+- ✅ NAudio 2.3.0 added (`NAudio.Core` + `NAudio.Midi`)
+- ⏳ Remove stale packages (`AsyncClipboardService`) — future cleanup
+- ⏳ Optional migrate from `packages.config` to `PackageReference`
 
 ## Keymap Reference (The Minstrel Auto)
 
@@ -146,11 +152,8 @@ Key structures:
 | 3 | `KeymapRegistry` (lookup, registration) | 6 passing | DONE |
 | 4 | `SendInput` P/Invoke wrapper | 7 passing | DONE |
 | 5 | `KeySendThread` (enqueue, dequeue, shutdown) | 6 passing | DONE |
+| 6 | `MidiInputManager` + `Module.cs` + `MidiNote` | 10 passing | DONE |
 
-## Next Chunk Options
+## Next Chunk
 
-1. **MidiInputManager** — NAudio `MidiIn` lifecycle, device enumeration, `MessageReceived` → `ConcurrentQueue`. Needs NAudio package added. Probably pairs with `Module.cs` wiring for full validation.
-
-2. **KeySender** — the deepest module. Consumes MIDI events, applies octave-shift logic using `KeymapRegistry`, produces `SendAction` sequences. High unit-test value, but depends on `KeySendThread` existing (done) and `MidiInputManager` existing (or an interface/abstraction for note events).
-
-Ask the user which to pick up first.
+**KeySender** — the deepest module. Consumes MIDI events, applies octave-shift logic using `KeymapRegistry`, produces `SendAction` sequences. High unit-test value. No external dependencies not already created.
