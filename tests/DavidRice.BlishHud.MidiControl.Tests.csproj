@@ -67,6 +67,9 @@
     <Compile Include="Input\SendInputApiTests.cs">
       <Link>Input\SendInputApiTests.cs</Link>
     </Compile>
+    <Compile Include="Core\KeySendThreadTests.cs">
+      <Link>Core\KeySendThreadTests.cs</Link>
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Microsoft.NETFramework.ReferenceAssemblies.net48.1.0.3\build\Microsoft.NETFramework.ReferenceAssemblies.net48.targets" Condition="Exists('..\packages\Microsoft.NETFramework.ReferenceAssemblies.net48.1.0.3\build\Microsoft.NETFramework.ReferenceAssemblies.net48.targets')" />

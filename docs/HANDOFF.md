@@ -30,8 +30,10 @@ E:/dev/blish-hud-midi-control/
 │   │   ├── KeymapRegistry.cs                        ← Chunk 3 DONE
 │   │   └── BuiltIn/
 │   │       └── MinstrelAutoKeymap.cs                ← Chunk 2 DONE
-│   └── Input/
-│       └── SendInput.cs                             ← Chunk 4 DONE
+│   ├── Input/
+│   │   └── SendInput.cs                             ← Chunk 4 DONE
+│   └── Core/
+│       └── KeySendThread.cs                         ← Chunk 5 DONE
 └── tests/
     ├── DavidRice.BlishHud.MidiControl.Tests.csproj
     ├── Program.cs                                   ← NUnitLite entry point
@@ -41,8 +43,10 @@ E:/dev/blish-hud-midi-control/
     │   ├── KeymapRegistryTests.cs                   ← Chunk 3
     │   └── BuiltIn/
     │       └── MinstrelAutoKeymapTests.cs           ← Chunk 2
-    └── Input/
-        └── SendInputApiTests.cs                     ← Chunk 4
+    ├── Input/
+    │   └── SendInputApiTests.cs                     ← Chunk 4
+    └── Core/
+        └── KeySendThreadTests.cs                    ← Chunk 5
 ```
 
 ## Decisions Already Made (Do Not Re-litigate)
@@ -78,8 +82,8 @@ src/
 │   ├── SendInput.cs                                   DONE
 │   └── MidiInputManager.cs                            (Phase 3 — needs NAudio)
 ├── Core/
-│   ├── KeySender.cs                                   (Phase 5)
-│   └── KeySendThread.cs                               (Phase 4 — depends on SendInput)
+│   ├── KeySendThread.cs                               DONE
+│   └── KeySender.cs                                   (Phase 5 — depends on KeySendThread)
 └── UI/
     └── SettingsView.cs                                (Phase 6)
 ```
@@ -141,13 +145,12 @@ Key structures:
 | 2 | Built-in keymap: `MinstrelAutoKeymap` | 12 passing | DONE |
 | 3 | `KeymapRegistry` (lookup, registration) | 6 passing | DONE |
 | 4 | `SendInput` P/Invoke wrapper | 7 passing | DONE |
+| 5 | `KeySendThread` (enqueue, dequeue, shutdown) | 6 passing | DONE |
 
 ## Next Chunk Options
 
-1. **KeySendThread** — dedicated background thread consuming `SendAction` via `BlockingCollection`, calling `SendInputApi`. Integration test for enqueue/dequeue/shutdown. Depends on Chunk 4.
+1. **MidiInputManager** — NAudio `MidiIn` lifecycle, device enumeration, `MessageReceived` → `ConcurrentQueue`. Needs NAudio package added. Probably pairs with `Module.cs` wiring for full validation.
 
-2. **MidiInputManager** — NAudio `MidiIn` lifecycle, device enumeration, `MessageReceived` → `ConcurrentQueue`. Needs NAudio package added. Probably pairs with `Module.cs` wiring for full validation.
-
-3. **KeySender** — the deepest module. Consumes MIDI events, applies octave-shift logic using `KeymapRegistry`, produces `SendAction` sequences. High unit-test value, but depends on both `KeySendThread` and `MidiInputManager` existing (or at least interfaces/mockable abstractions).
+2. **KeySender** — the deepest module. Consumes MIDI events, applies octave-shift logic using `KeymapRegistry`, produces `SendAction` sequences. High unit-test value, but depends on `KeySendThread` existing (done) and `MidiInputManager` existing (or an interface/abstraction for note events).
 
 Ask the user which to pick up first.
