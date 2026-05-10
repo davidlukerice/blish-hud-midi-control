@@ -7,7 +7,7 @@
   "description": "Converts MIDI device messages to keypresses for playing GW2 Instruments",
   "enabled_without_gw2": true,
   "dependencies": {
-    "bh.blishhud": ">=0.5.2"
+    "bh.blishhud": ">=1.0.0"
   },
   "url": "https://github.com/davidlukerice/blish-hud-midi-control",
   "contributors": [

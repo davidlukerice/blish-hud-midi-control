@@ -39,6 +39,7 @@ namespace DavidRice.BlishHud.MidiControl
         private Core.MidiInputManager _midiInputManager = null!;
         private KeymapRegistry _keymapRegistry = null!;
         private Core.KeySendThread _keySendThread = null!;
+        private Core.KeySender _keySender = null!;
 
         // ---- UI ----
         private CornerIcon? _cornerIcon;
@@ -68,6 +69,7 @@ namespace DavidRice.BlishHud.MidiControl
                 "Send Notes",
                 "If enabled, MIDI notes are sent as GW2 keyboard keypresses.");
             _sendNotes.SettingChanged += OnSendNotesChanged;
+            _selectedKeymapId.SettingChanged += OnKeymapChanged;
 
             _autoSwapOctave = settings.DefineSetting(
                 "AutoSwapOctave",
@@ -98,6 +100,8 @@ namespace DavidRice.BlishHud.MidiControl
             _keySendThread = new Core.KeySendThread();
             _keySendThread.Start();
 
+            _keySender = new Core.KeySender(_keySendThread);
+
             CreateCornerIcon();
             UpdateCornerIconState();
 
@@ -116,13 +120,23 @@ namespace DavidRice.BlishHud.MidiControl
 
         protected override void Update(GameTime gameTime)
         {
-            // Drain the MIDI event queue.
-            // KeySender is not wired yet — for now we only dequeue to keep the queue from growing unbounded.
             while (_midiQueue.TryDequeue(out Core.MidiNoteEvent noteEvent))
             {
-#if DEBUG
-                Logger.Debug($"MIDI event received: {noteEvent}");
-#endif
+                if (!_sendNotes.Value)
+                    continue;
+
+                if (_focusGuard.Value && !GameService.GameIntegration.Gw2IsRunning)
+                    continue;
+
+                Keymap? keymap = GetActiveKeymap();
+                if (keymap == null)
+                    continue;
+
+                _keySender.Send(
+                    noteEvent,
+                    keymap,
+                    _autoSwapOctave.Value,
+                    _multipleOctaveShiftDelay.Value);
             }
         }
 
@@ -134,6 +148,7 @@ namespace DavidRice.BlishHud.MidiControl
         protected override void Unload()
         {
             _sendNotes.SettingChanged -= OnSendNotesChanged;
+            _selectedKeymapId.SettingChanged -= OnKeymapChanged;
 
             _cornerIcon?.Dispose();
             _cornerIcon = null;
@@ -192,6 +207,31 @@ namespace DavidRice.BlishHud.MidiControl
         private void OnSendNotesChanged(object sender, ValueChangedEventArgs<bool> e)
         {
             UpdateCornerIconState();
+        }
+
+        private void OnKeymapChanged(object sender, ValueChangedEventArgs<string> e)
+        {
+            // Fresh KeySender so the internal octave tracker resets to 0.
+            if (_keySendThread != null)
+            {
+                _keySender = new Core.KeySender(_keySendThread);
+            }
+        }
+
+        private Keymap? GetActiveKeymap()
+        {
+            string id = _selectedKeymapId.Value;
+            Keymap? keymap = _keymapRegistry.FindById(id);
+            if (keymap != null)
+                return keymap;
+
+            Logger.Warn($"Keymap '{id}' not found; falling back to 'minstrel-auto'.");
+            keymap = _keymapRegistry.FindById("minstrel-auto");
+            if (keymap != null)
+                return keymap;
+
+            Logger.Error("Fallback keymap 'minstrel-auto' not found. No notes will be sent.");
+            return null;
         }
 
         private static Texture2D CreateSolidTexture(GraphicsDevice device, Color color, int size)

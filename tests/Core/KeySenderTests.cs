@@ -235,5 +235,20 @@ namespace DavidRice.BlishHud.MidiControl.Tests.Core
             // F#4 forces internal octave to 0
             Assert.That(sender.CurrentOctave, Is.EqualTo(0));
         }
+
+        [Test]
+        public void FreshInstance_StartsAtOctaveZero()
+        {
+            using var thread = new KeySendThread(_ => { });
+            thread.Start();
+
+            var sender1 = new KeySender(thread);
+            sender1.Send(new MidiNoteEvent(66, isNoteOn: true), MinstrelAutoKeymap.Instance, autoSwap: true, shiftDelayMs: 0);
+            Assert.That(sender1.CurrentOctave, Is.EqualTo(0));
+
+            // Simulating a keymap change: Module replaces the KeySender with a fresh instance.
+            var sender2 = new KeySender(thread);
+            Assert.That(sender2.CurrentOctave, Is.EqualTo(0), "Fresh KeySender must reset octave tracker to 0.");
+        }
     }
 }
