@@ -234,6 +234,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <PostBuildEvent>
+      xcopy /Y "$(TargetDir)Blish HUD - MIDI Control.bhm" "%25USERPROFILE%25\Documents\Guild Wars 2\addons\blishhud\modules\"
     </PostBuildEvent>
   </PropertyGroup>
   <Import Project="packages\MonoGame.Framework.WindowsDX.3.7.1.189\build\MonoGame.Framework.WindowsDX.targets" Condition="Exists('packages\MonoGame.Framework.WindowsDX.3.7.1.189\build\MonoGame.Framework.WindowsDX.targets')" />
