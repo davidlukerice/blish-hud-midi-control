@@ -68,6 +68,7 @@
     <Compile Include="src\Keymaps\NoteDefinition.cs" />
     <Compile Include="src\Keymaps\KeymapRegistry.cs" />
     <Compile Include="src\Keymaps\BuiltIn\MinstrelAutoKeymap.cs" />
+    <Compile Include="src\Input\SendInput.cs" />
     <Compile Include="Module.cs" />
   </ItemGroup>
   <ItemGroup>

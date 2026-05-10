@@ -6,7 +6,6 @@
 - **Design grilling complete**: All architecture, data model, UI, threading, and error-handling decisions resolved.
 - **PRD published**: `docs/MIDI-Control-v1-PRD.md` (status: `ready-for-agent`).
 - **Glossary published**: `CONTEXT.md` — canonical terms. If the next agent uses different terminology, challenge them against this file.
-- **Chunk 1 complete**: `NoteDefinition` and `Keymap` domain models implemented with red/green TDD.
 
 ## Current Codebase State
 
@@ -26,14 +25,24 @@ E:/dev/blish-hud-midi-control/
 │   ├── HANDOFF.md                                   ← this file
 │   └── agent-instructions.md                        ← scope discipline rules
 ├── src/
-│   └── Keymaps/
-│       └── NoteDefinition.cs                        ← Keymap + NoteDefinition (Chunk 1 DONE)
-├── tests/
-│   ├── DavidRice.BlishHud.MidiControl.Tests.csproj
-│   ├── Program.cs                                   ← NUnitLite entry point
-│   └── Keymaps/
-│       ├── NoteDefinitionTests.cs
-│       └── KeymapTests.cs                           ← all 8 tests pass
+│   ├── Keymaps/
+│   │   ├── NoteDefinition.cs                        ← Keymap + NoteDefinition (Chunk 1 DONE)
+│   │   ├── KeymapRegistry.cs                        ← Chunk 3 DONE
+│   │   └── BuiltIn/
+│   │       └── MinstrelAutoKeymap.cs                ← Chunk 2 DONE
+│   └── Input/
+│       └── SendInput.cs                             ← Chunk 4 DONE
+└── tests/
+    ├── DavidRice.BlishHud.MidiControl.Tests.csproj
+    ├── Program.cs                                   ← NUnitLite entry point
+    ├── Keymaps/
+    │   ├── NoteDefinitionTests.cs                   ← Chunk 1
+    │   ├── KeymapTests.cs                           ← Chunk 1
+    │   ├── KeymapRegistryTests.cs                   ← Chunk 3
+    │   └── BuiltIn/
+    │       └── MinstrelAutoKeymapTests.cs           ← Chunk 2
+    └── Input/
+        └── SendInputApiTests.cs                     ← Chunk 4
 ```
 
 ## Decisions Already Made (Do Not Re-litigate)
@@ -53,7 +62,7 @@ E:/dev/blish-hud-midi-control/
 | Focus guard | Optional setting, uses `GameService.GameIntegration.Gw2Instance.IsInGame` |
 | Tests | Unit tests for `KeySender` and `KeymapRegistry`; integration for `KeySendThread` |
 | Namespace | `DavidRice.BlishHud.MidiControl` (was `Blish_HUD___MIDI_Control`) |
-| Build | `msbuild "Blish HUD - MIDI Control.sln" -p:Configuration=Debug -p:Platform=x64` |
+| Build | MSBuild `"Blish HUD - MIDI Control.sln" -p:Configuration=Debug -p:Platform=x64` |
 | Test runner | `tests/bin/x64/Debug/DavidRice.BlishHud.MidiControl.Tests.exe --noheader` |
 
 ## Source Files to Create (Remaining)
@@ -62,20 +71,20 @@ E:/dev/blish-hud-midi-control/
 src/
 ├── Keymaps/
 │   ├── NoteDefinition.cs                              DONE
-│   ├── BuiltIn/
-│   │   └── MinstrelAutoKeymap.cs                      (next chunk candidate)
-│   └── KeymapRegistry.cs                              (next chunk candidate)
+│   ├── KeymapRegistry.cs                              DONE
+│   └── BuiltIn/
+│       └── MinstrelAutoKeymap.cs                      DONE
 ├── Input/
-│   ├── MidiInputManager.cs                            (Phase 3 — needs NAudio)
-│   └── SendInput.cs                                   (Phase 4 — P/Invoke wrapper)
+│   ├── SendInput.cs                                   DONE
+│   └── MidiInputManager.cs                            (Phase 3 — needs NAudio)
 ├── Core/
 │   ├── KeySender.cs                                   (Phase 5)
-│   └── KeymapRegistry.cs                              (choose one location)
+│   └── KeySendThread.cs                               (Phase 4 — depends on SendInput)
 └── UI/
     └── SettingsView.cs                                (Phase 6)
 ```
 
-> **Decision needed**: `KeymapRegistry` should live under `src/Keymaps/` (data/discovery) rather than `src/Core/`. Both the implementation plan and the handoff listed it in both places — clean this up.
+> ✅ **KeymapRegistry** lives under `src/Keymaps/` (data/discovery), not `src/Core/`. Both the implementation plan and an earlier handoff briefly listed it in both places — resolved.
 
 ## What to Change in Existing Files (Remaining)
 
@@ -115,23 +124,30 @@ Key structures:
 2. **Thread safety**: `MidiInputManager` event handler runs on a background thread. All data passed to the game thread must go through `ConcurrentQueue`. Never touch Blish HUD UI state from the MIDI callback.
 3. **KeyTap vs KeyUp safety**: On unload, send key-up for all possible keys (`1-8`, `9`, `0`) to prevent stuck states. `KeySender` produces `KeyTap` actions with zero delay for normal notes.
 4. **Copy Local = False**: All Blish HUD and MonoGame references must have `Copy Local = False`. Otherwise the module DLL bloats with assemblies Blish HUD already has loaded.
+5. **`NoteDefinition.Key` is nullable**: Notes with only `ForceInternalOctave` have no key (e.g., `F#4`/`G#4`/`A#4`). `KeySender` must check for null before enqueueing a keypress.
 
 ## Testing Strategy (Reiterated from PRD)
 
 - **KeySender**: Pure unit tests. Feed `(note, currentOctave, keymap)` → assert `(SendAction[], newOctave)`.
-- **KeymapRegistry**: Unit tests for lookup and built-in discovery.
+- **KeymapRegistry**: Unit tests for lookup and built-in discovery. ✅ Done.
 - **KeySendThread**: Integration test for enqueue/dequeue/shutdown lifecycle.
-- No unit tests for `SendInput` (hardware), `MidiInputManager` (requires MIDI device), or Blish HUD UI controls.
+- No unit tests for `SendInput` (hardware — tested for input validation + struct sizing only), `MidiInputManager` (requires MIDI device), or Blish HUD UI controls.
 
 ## Chunk History
 
 | # | Description | Tests | Status |
 |---|---|---|---|
 | 1 | Domain model: `NoteDefinition`, `Keymap` | 8 passing | DONE |
+| 2 | Built-in keymap: `MinstrelAutoKeymap` | 12 passing | DONE |
+| 3 | `KeymapRegistry` (lookup, registration) | 6 passing | DONE |
+| 4 | `SendInput` P/Invoke wrapper | 7 passing | DONE |
 
 ## Next Chunk Options
 
-1. **MinstrelAutoKeymap.cs** — port the TypeScript data into a static class that returns a populated `Keymap`. Adds no new dependencies. Low risk, high value — validates the domain model against real data.
-2. **KeymapRegistry** — keys, alt-octaves, and manual shift bindings. Pure C#, unit-testable.
+1. **KeySendThread** — dedicated background thread consuming `SendAction` via `BlockingCollection`, calling `SendInputApi`. Integration test for enqueue/dequeue/shutdown. Depends on Chunk 4.
+
+2. **MidiInputManager** — NAudio `MidiIn` lifecycle, device enumeration, `MessageReceived` → `ConcurrentQueue`. Needs NAudio package added. Probably pairs with `Module.cs` wiring for full validation.
+
+3. **KeySender** — the deepest module. Consumes MIDI events, applies octave-shift logic using `KeymapRegistry`, produces `SendAction` sequences. High unit-test value, but depends on both `KeySendThread` and `MidiInputManager` existing (or at least interfaces/mockable abstractions).
 
 Ask the user which to pick up first.
