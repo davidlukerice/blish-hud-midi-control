@@ -72,7 +72,9 @@
     <Compile Include="src\Core\MidiInputManager.cs" />
     <Compile Include="src\Core\MidiNoteEvent.cs" />
     <Compile Include="src\Core\MidiNote.cs" />
+    <Compile Include="src\Core\KeySender.cs" />
     <Compile Include="src\Input\SendInput.cs" />
+    <Compile Include="src\Input\KeyToScanCode.cs" />
     <Compile Include="Module.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -234,7 +236,6 @@
   </PropertyGroup>
   <PropertyGroup>
     <PostBuildEvent>
-      xcopy /Y "$(TargetDir)Blish HUD - MIDI Control.bhm" "%25USERPROFILE%25\Documents\Guild Wars 2\addons\blishhud\modules\"
     </PostBuildEvent>
   </PropertyGroup>
   <Import Project="packages\MonoGame.Framework.WindowsDX.3.7.1.189\build\MonoGame.Framework.WindowsDX.targets" Condition="Exists('packages\MonoGame.Framework.WindowsDX.3.7.1.189\build\MonoGame.Framework.WindowsDX.targets')" />

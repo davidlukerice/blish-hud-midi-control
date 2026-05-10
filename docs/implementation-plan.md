@@ -54,7 +54,7 @@
 
 Port the TypeScript data to a static C# class that returns a fully populated `Keymap` instance. All notes, alt-octave definitions, and octave shift bindings.
 
-→ **Recommended next chunk**
+✅ **Chunk 2 implemented** — `MinstrelAutoKeymap.cs` with TDD (12 tests passing)
 
 ### KeymapRegistry
 
@@ -62,6 +62,8 @@ Port the TypeScript data to a static C# class that returns a fully populated `Ke
 - Starts with 1 built-in (Minstrel Auto)
 - On load: scan the module data directory (`DirectoriesManager`) for `.json` files matching the keymap schema, deserialize with `System.Text.Json` (or `Newtonsoft.Json` if already available), append to list
 - `FindById(string id) → Keymap?` and `FindByName(string name) → Keymap?` for fallback resolution
+
+✅ **Chunk 3 implemented** — `KeymapRegistry.cs` with TDD (6 tests passing)
 
 ## Phase 3 — MIDI Input
 
@@ -95,27 +97,35 @@ Helper: `SendKeyTap(char key)` → sends down + up in a single `SendInput` call 
 
 Helper: `SendKeyUp(char key)` → send key-up for unload safety.
 
+✅ **Chunk 4 implemented** — `SendInput.cs` with TDD (7 tests passing)
+
+### KeyToScanCode
+
+Maps string key names to Win32 scan codes. Used by `KeySender` and `SendInput`.
+
+✅ **Chunk 7 implemented** — `KeyToScanCode.cs` with TDD (13 tests passing)
+
 ### KeySendThread
 
 - Dedicated `Thread` with `BlockingCollection<SendAction>`
-- `SendAction` = `{ char Key, int DelayAfterMs }`
-- Loop: dequeue, `SendKeyTap(Key)`, if `DelayAfterMs > 0` then `Thread.Sleep(DelayAfterMs)`
+- `SendAction` = `{ uint ScanCode, int DelayAfterMs }`
+- Loop: dequeue, `SendKeyTap(ScanCode)`, if `DelayAfterMs > 0` then `Thread.Sleep(DelayAfterMs)`
 - Thread created on `LoadAsync`, joined/disposed on `Unload`
 
-## Phase 5 — KeySender (Business Logic)
+✅ **Chunk 5 implemented** — `KeySendThread.cs` with TDD (6 tests passing)
+
+### KeySender
 
 - Drains `ConcurrentQueue<NoteEvent>` once per `Module.Update()`
-- Maintains `int _currentOctave` (starts at 1 for Minstrel)
-- For each `noteon`:
-  1. Look up note in active `Keymap`
-  2. If not found, log (debug builds only) and skip
-  3. If `AutoOctaveSwap` is on, compare note octave to `_currentOctave`
-  4. If `AltOctave` matches `_currentOctave`, use `AltOctaveKey` (no shift needed)
-  5. Otherwise, enqueue octave shifts (`9`/`0`) with delay if multi-octave
-  6. Enqueue the note key with `DelayAfterMs = 0`
-  7. Update `_currentOctave`
+- Maintains `int _currentOctave` (starts at 0)
+- Pure `Resolve()` function for unit testing: feed `(noteEvent, keymap, currentOctave, autoSwap, shiftDelayMs)` → `(SendAction[], newOctave)`
+- `Send()` calls `Resolve()` and enqueues into `KeySendThread`, then updates `_currentOctave`
+- Octave shift logic: auto-swap, alt-octave, multi-shift delay
+- Manual shift keys (e.g. `C#4` → `"9"`) update octave tracker
+- `ForceInternalOctave` notes silently update octave with no keypress
+- Focus guard check before every enqueue: if `FocusGuard` setting is enabled and `GameService.GameIntegration.Gw2Instance.IsInGame` is `false`, enqueue nothing.
 
-Focus guard check before every enqueue: if `FocusGuard` setting is enabled and `GameService.GameIntegration.Gw2Instance.IsInGame` is `false`, enqueue nothing.
+✅ **Chunk 7 implemented** — `KeySender.cs` with TDD (16 tests passing)
 
 ## Phase 6 — Module Shell & Lifecycle
 

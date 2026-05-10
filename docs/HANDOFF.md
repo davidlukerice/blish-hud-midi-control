@@ -31,12 +31,14 @@ E:/dev/blish-hud-midi-control/
 │   │   └── BuiltIn/
 │   │       └── MinstrelAutoKeymap.cs                ← Chunk 2 DONE
 │   ├── Input/
-│   │   └── SendInput.cs                             ← Chunk 4 DONE
+│   │   ├── SendInput.cs                             ← Chunk 4 DONE
+│   │   └── KeyToScanCode.cs                         ← Chunk 7 DONE
 │   └── Core/
 │       ├── KeySendThread.cs                         ← Chunk 5 DONE
 │       ├── MidiInputManager.cs                      ← Chunk 6 DONE
 │       ├── MidiNoteEvent.cs                         ← Chunk 6 DONE
-│       └── MidiNote.cs                              ← Chunk 6 DONE
+│       ├── MidiNote.cs                              ← Chunk 6 DONE
+│       └── KeySender.cs                             ← Chunk 7 DONE
 └── tests/
     ├── DavidRice.BlishHud.MidiControl.Tests.csproj
     ├── Program.cs                                   ← NUnitLite entry point
@@ -47,10 +49,12 @@ E:/dev/blish-hud-midi-control/
     │   └── BuiltIn/
     │       └── MinstrelAutoKeymapTests.cs           ← Chunk 2
     ├── Input/
-    │   └── SendInputApiTests.cs                     ← Chunk 4
+    │   ├── SendInputApiTests.cs                     ← Chunk 4
+    │   └── KeyToScanCodeTests.cs                    ← Chunk 7
     └── Core/
         ├── KeySendThreadTests.cs                    ← Chunk 5
-        └── MidiNoteTests.cs                         ← Chunk 6
+        ├── MidiNoteTests.cs                         ← Chunk 6
+        └── KeySenderTests.cs                        ← Chunk 7
 ```
 
 ## Decisions Already Made (Do Not Re-litigate)
@@ -83,13 +87,14 @@ src/
 │   └── BuiltIn/
 │       └── MinstrelAutoKeymap.cs                      DONE
 ├── Input/
-│   └── SendInput.cs                                   DONE
+│   ├── SendInput.cs                                   DONE
+│   └── KeyToScanCode.cs                               DONE
 ├── Core/
 │   ├── KeySendThread.cs                               DONE
-│   ├── MidiInputManager.cs                            DONE ← Chunk 6
-│   ├── MidiNoteEvent.cs                               DONE ← Chunk 6
-│   ├── MidiNote.cs                                    DONE ← Chunk 6
-│   └── KeySender.cs                                   (Phase 5 — deepest module)
+│   ├── MidiInputManager.cs                            DONE
+│   ├── MidiNoteEvent.cs                               DONE
+│   ├── MidiNote.cs                                    DONE
+│   └── KeySender.cs                                   DONE
 └── UI/
     └── SettingsView.cs                                (Phase 6)
 ```
@@ -108,9 +113,12 @@ src/
   - `LoadAsync()` → `KeySendThread`, corner icon, re-open saved MIDI device
   - `Update()` → drain MIDI queue (KeySender not wired yet)
   - `Unload()` → dispose all, safety key-up burst
+- ⏳ **Remaining**: Wire `KeySender` into `Update()`, instantiate in `LoadAsync()`, track `_currentOctave`, react to settings changes
 
 ### `.csproj`
 - ✅ NAudio 2.3.0 added (`NAudio.Core` + `NAudio.Midi`)
+- ✅ New source files added: `KeyToScanCode.cs`, `KeySender.cs`
+- ✅ Post-build event temporarily cleared (`.bhm` xcopy fails when file doesn't exist yet; restore when ready)
 - ⏳ Remove stale packages (`AsyncClipboardService`) — future cleanup
 - ⏳ Optional migrate from `packages.config` to `PackageReference`
 
@@ -153,7 +161,8 @@ Key structures:
 | 4 | `SendInput` P/Invoke wrapper | 7 passing | DONE |
 | 5 | `KeySendThread` (enqueue, dequeue, shutdown) | 6 passing | DONE |
 | 6 | `MidiInputManager` + `Module.cs` + `MidiNote` | 10 passing | DONE |
+| 7 | `KeyToScanCode` mapping utility + `KeySender` (octave logic, alt octave, multi-shift delay) | 16 passing | DONE |
 
 ## Next Chunk
 
-**KeySender** — the deepest module. Consumes MIDI events, applies octave-shift logic using `KeymapRegistry`, produces `SendAction` sequences. High unit-test value. No external dependencies not already created.
+**Wire KeySender into Module.cs** — Replace the `Update()` queue drain with actual `KeySender` processing, track `_currentOctave`, instantiate `KeySender` in `LoadAsync()`, react to settings changes (`_selectedKeymapId`, `_autoSwapOctave`, `_multipleOctaveShiftDelay`). This is the chunk that makes the module functional end-to-end.

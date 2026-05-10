@@ -67,11 +67,17 @@
     <Compile Include="Input\SendInputApiTests.cs">
       <Link>Input\SendInputApiTests.cs</Link>
     </Compile>
+    <Compile Include="Input\KeyToScanCodeTests.cs">
+      <Link>Input\KeyToScanCodeTests.cs</Link>
+    </Compile>
     <Compile Include="Core\KeySendThreadTests.cs">
       <Link>Core\KeySendThreadTests.cs</Link>
     </Compile>
     <Compile Include="Core\MidiNoteTests.cs">
       <Link>Core\MidiNoteTests.cs</Link>
+    </Compile>
+    <Compile Include="Core\KeySenderTests.cs">
+      <Link>Core\KeySenderTests.cs</Link>
     </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
