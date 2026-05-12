@@ -13,7 +13,7 @@
     <ProjectGuid>{7B7829DD-C17E-45A7-83FF-94AC7232B1C7}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>DavidRice.BlishHud.MidiControl</RootNamespace>
-    <AssemblyName>MIDI Control</AssemblyName>
+    <AssemblyName>Blish HUD - MIDI Control</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -315,7 +315,6 @@
     <None Include="ref\_instructions.txt" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Properties\Resources.resx" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import
