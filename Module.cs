@@ -139,7 +139,7 @@ namespace DavidRice.BlishHud.MidiControl
                 if (!_sendNotes.Value)
                     continue;
 
-                if (_focusGuard.Value && !GameService.GameIntegration.Gw2IsRunning)
+                if (_focusGuard.Value && !GameService.GameIntegration.Gw2Instance.Gw2IsRunning)
                     continue;
 
                 Keymap? keymap = GetActiveKeymap();
@@ -185,9 +185,12 @@ namespace DavidRice.BlishHud.MidiControl
         {
             try
             {
-                var gd = GameService.Graphics.GraphicsDevice;
-                _activeIconTexture = CreateSolidTexture(gd, Color.Green, 16);
-                _mutedIconTexture = CreateSolidTexture(gd, Color.Gray, 16);
+                using (var ctx = GameService.Graphics.LendGraphicsDeviceContext())
+                {
+                    var gd = ctx.GraphicsDevice;
+                    _activeIconTexture = CreateSolidTexture(gd, Color.Green, 16);
+                    _mutedIconTexture = CreateSolidTexture(gd, Color.Gray, 16);
+                }
 
                 _cornerIcon = new CornerIcon
                 {
