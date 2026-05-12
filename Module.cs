@@ -1,18 +1,22 @@
 #nullable enable
 
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.ComponentModel.Composition;
+using System.Linq;
+using System.Threading.Tasks;
 using Blish_HUD;
 using Blish_HUD.Controls;
+using Blish_HUD.Graphics.UI;
 using Blish_HUD.Modules;
 using Blish_HUD.Modules.Managers;
 using Blish_HUD.Settings;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
-using System.Collections.Concurrent;
-using System.ComponentModel.Composition;
-using System.Threading.Tasks;
 using DavidRice.BlishHud.MidiControl.Input;
 using DavidRice.BlishHud.MidiControl.Keymaps;
+using DavidRice.BlishHud.MidiControl.UI;
 
 namespace DavidRice.BlishHud.MidiControl
 {
@@ -27,6 +31,7 @@ namespace DavidRice.BlishHud.MidiControl
         internal Gw2ApiManager Gw2ApiManager => ModuleParameters.Gw2ApiManager;
 
         // ---- Settings ----
+        private SettingCollection _settingsCollection = null!;
         private SettingEntry<string> _selectedMidiDeviceName = null!;
         private SettingEntry<string> _selectedKeymapId = null!;
         private SettingEntry<bool> _sendNotes = null!;
@@ -41,16 +46,22 @@ namespace DavidRice.BlishHud.MidiControl
         private Core.KeySendThread _keySendThread = null!;
         private Core.KeySender _keySender = null!;
 
+        // ---- Diagnostics ----
+        private readonly Queue<string> _recentSendLog = new Queue<string>(10);
+
         // ---- UI ----
         private CornerIcon? _cornerIcon;
         private Texture2D? _activeIconTexture;
         private Texture2D? _mutedIconTexture;
+        private TabbedWindow? _settingsWindow;
 
         [ImportingConstructor]
         public MidiModule([Import("ModuleParameters")] ModuleParameters moduleParameters) : base(moduleParameters) { }
 
         protected override void DefineSettings(SettingCollection settings)
         {
+            _settingsCollection = settings;
+
             _selectedMidiDeviceName = settings.DefineSetting(
                 "SelectedMidiDeviceName",
                 string.Empty,
@@ -93,6 +104,8 @@ namespace DavidRice.BlishHud.MidiControl
         {
             _keymapRegistry = new KeymapRegistry();
             _midiInputManager = new Core.MidiInputManager(_midiQueue);
+
+            _recentSendLog.Enqueue("No sends yet.");
         }
 
         protected override async Task LoadAsync()
@@ -101,6 +114,7 @@ namespace DavidRice.BlishHud.MidiControl
             _keySendThread.Start();
 
             _keySender = new Core.KeySender(_keySendThread);
+            _keySender.NoteProcessed += OnNoteProcessed;
 
             CreateCornerIcon();
             UpdateCornerIconState();
@@ -140,15 +154,14 @@ namespace DavidRice.BlishHud.MidiControl
             }
         }
 
-        protected override void OnModuleLoaded(EventArgs e)
-        {
-            base.OnModuleLoaded(e);
-        }
-
         protected override void Unload()
         {
             _sendNotes.SettingChanged -= OnSendNotesChanged;
             _selectedKeymapId.SettingChanged -= OnKeymapChanged;
+            _keySender.NoteProcessed -= OnNoteProcessed;
+
+            _settingsWindow?.Dispose();
+            _settingsWindow = null;
 
             _cornerIcon?.Dispose();
             _cornerIcon = null;
@@ -186,8 +199,14 @@ namespace DavidRice.BlishHud.MidiControl
 
                 _cornerIcon.Click += (s, e) =>
                 {
-                    // Toggle SendNotes when corner icon is clicked
-                    _sendNotes.Value = !_sendNotes.Value;
+                    if (_settingsWindow == null)
+                    {
+                        _settingsWindow = new TabbedWindow();
+                        var settingsPanel = new Panel { CanScroll = true, ShowTint = true };
+                        new MidiSettingsView(this).Build(settingsPanel);
+                        _settingsWindow.AddTab("Settings", null, settingsPanel);
+                    }
+                    _settingsWindow.ToggleWindow();
                 };
             }
             catch (Exception ex)
@@ -214,8 +233,24 @@ namespace DavidRice.BlishHud.MidiControl
             // Fresh KeySender so the internal octave tracker resets to 0.
             if (_keySendThread != null)
             {
+                _keySender.NoteProcessed -= OnNoteProcessed;
                 _keySender = new Core.KeySender(_keySendThread);
+                _keySender.NoteProcessed += OnNoteProcessed;
             }
+        }
+
+        private void OnNoteProcessed(Core.MidiNoteEvent noteEvent, Core.KeySendResult result)
+        {
+            string noteName = Core.MidiNote.GetNoteName(noteEvent.NoteNumber);
+            int actionCount = result.Actions.Length;
+            string desc = $"{noteName}: {actionCount} action(s), octave={result.NewOctave}";
+
+            if (_recentSendLog.Count > 0 && _recentSendLog.Peek() == "No sends yet.")
+                _recentSendLog.Dequeue();
+
+            _recentSendLog.Enqueue(desc);
+            while (_recentSendLog.Count > 10)
+                _recentSendLog.Dequeue();
         }
 
         private Keymap? GetActiveKeymap()
@@ -233,6 +268,81 @@ namespace DavidRice.BlishHud.MidiControl
             Logger.Error("Fallback keymap 'minstrel-auto' not found. No notes will be sent.");
             return null;
         }
+
+        // ---- Public API for Settings View ----
+
+        public IReadOnlyList<string> AvailableMidiDevices => Core.MidiInputManager.AvailableDevices;
+        public IReadOnlyList<Keymap> AvailableKeymaps => _keymapRegistry.AllKeymaps;
+
+        public string SelectedMidiDeviceName => _selectedMidiDeviceName.Value;
+        public string SelectedKeymapId => _selectedKeymapId.Value;
+
+        public bool SendNotesEnabled
+        {
+            get => _sendNotes.Value;
+            set => _sendNotes.Value = value;
+        }
+
+        public bool AutoSwapOctaveEnabled
+        {
+            get => _autoSwapOctave.Value;
+            set => _autoSwapOctave.Value = value;
+        }
+
+        public bool FocusGuardEnabled
+        {
+            get => _focusGuard.Value;
+            set => _focusGuard.Value = value;
+        }
+
+        public int MultipleOctaveShiftDelay
+        {
+            get => _multipleOctaveShiftDelay.Value;
+            set => _multipleOctaveShiftDelay.Value = value;
+        }
+
+        public string MidiDeviceStatus
+        {
+            get
+            {
+                if (_midiInputManager?.IsDeviceOpen == true && !string.IsNullOrEmpty(_midiInputManager.ActiveDeviceName))
+                    return $"Connected: {_midiInputManager.ActiveDeviceName}";
+                if (!string.IsNullOrEmpty(_selectedMidiDeviceName.Value))
+                    return $"Not connected. Saved: {_selectedMidiDeviceName.Value}";
+                return "No device selected.";
+            }
+        }
+
+        public string LastSendLog
+        {
+            get
+            {
+                if (_recentSendLog.Count == 0)
+                    return "No sends yet.";
+                return string.Join("\n", _recentSendLog.Reverse());
+            }
+        }
+
+        public void OpenMidiDevice(string deviceName)
+        {
+            bool opened = _midiInputManager.Open(deviceName);
+            if (opened)
+            {
+                _selectedMidiDeviceName.Value = deviceName;
+                Logger.Info($"MIDI device opened: {deviceName}");
+            }
+            else
+            {
+                Logger.Warn($"Failed to open MIDI device: {deviceName}");
+            }
+        }
+
+        public void SelectKeymap(string id)
+        {
+            _selectedKeymapId.Value = id;
+        }
+
+        // ---- Helpers ----
 
         private static Texture2D CreateSolidTexture(GraphicsDevice device, Color color, int size)
         {

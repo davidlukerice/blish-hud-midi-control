@@ -237,6 +237,24 @@ namespace DavidRice.BlishHud.MidiControl.Tests.Core
         }
 
         [Test]
+        public void Send_FiresNoteProcessedEvent()
+        {
+            using var thread = new KeySendThread(_ => { });
+            thread.Start();
+
+            var sender = new KeySender(thread);
+            KeySendResult? captured = null;
+            sender.NoteProcessed += (evt, result) => captured = result;
+
+            var note = new MidiNoteEvent(48, isNoteOn: true); // C3
+            sender.Send(note, MinstrelAutoKeymap.Instance, autoSwap: true, shiftDelayMs: 0);
+
+            Assert.That(captured, Is.Not.Null);
+            Assert.That(captured.Value.Actions, Has.Length.EqualTo(1));
+            Assert.That(captured.Value.NewOctave, Is.EqualTo(0));
+        }
+
+        [Test]
         public void FreshInstance_StartsAtOctaveZero()
         {
             using var thread = new KeySendThread(_ => { });

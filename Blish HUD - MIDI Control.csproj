@@ -75,6 +75,7 @@
     <Compile Include="src\Core\KeySender.cs" />
     <Compile Include="src\Input\SendInput.cs" />
     <Compile Include="src\Input\KeyToScanCode.cs" />
+    <Compile Include="src\UI\MidiSettingsView.cs" />
     <Compile Include="Module.cs" />
   </ItemGroup>
   <ItemGroup>

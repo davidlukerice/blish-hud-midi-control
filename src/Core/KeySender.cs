@@ -35,6 +35,12 @@ namespace DavidRice.BlishHud.MidiControl.Core
         public int CurrentOctave => _currentOctave;
 
         /// <summary>
+        /// Fires after a note has been resolved and its <see cref="SendAction"/>s have been enqueued.
+        /// Useful for logging and diagnostics.
+        /// </summary>
+        public event Action<MidiNoteEvent, KeySendResult>? NoteProcessed;
+
+        /// <summary>
         /// Processes a single MIDI note event, applying the active keymap and current octave state.
         /// <see cref="SendAction"/>s are enqueued immediately into the backing <see cref="KeySendThread"/>.
         /// </summary>
@@ -45,6 +51,7 @@ namespace DavidRice.BlishHud.MidiControl.Core
             {
                 _keySendThread.Enqueue(action);
             }
+            NoteProcessed?.Invoke(noteEvent, result);
             _currentOctave = result.NewOctave;
         }
 
