@@ -16,9 +16,13 @@ namespace DavidRice.BlishHud.MidiControl.Core
         private MidiIn? _midiIn;
         private string? _activeDeviceName;
         private bool _disposed;
+        private bool _retryingConnection;
+        private DateTime _lastConnectionCheck = DateTime.MinValue;
+        private static readonly TimeSpan ConnectionCheckInterval = TimeSpan.FromSeconds(10);
 
         public string? ActiveDeviceName => _activeDeviceName;
         public bool IsDeviceOpen => _midiIn != null;
+        public bool IsRetryingConnection => _retryingConnection;
 
         public MidiInputManager(ConcurrentQueue<MidiNoteEvent> noteQueue)
         {
@@ -71,6 +75,7 @@ namespace DavidRice.BlishHud.MidiControl.Core
                 _midiIn.ErrorReceived += OnErrorReceived;
                 _midiIn.Start();
                 _activeDeviceName = deviceName;
+                _retryingConnection = false;
                 Logger.Info($"Opened MIDI device: {deviceName}");
                 return true;
             }
@@ -112,7 +117,52 @@ namespace DavidRice.BlishHud.MidiControl.Core
                 return;
 
             _disposed = true;
+            _retryingConnection = false;
             Close();
+        }
+
+        /// <summary>
+        /// Called each frame to check connection health and auto-reconnect when the target
+        /// device disappears or reappears.  Throttled to <see cref="ConnectionCheckInterval"/>.
+        /// Returns immediately when <paramref name="targetDeviceName"/> is null or empty.
+        /// </summary>
+        public void CheckConnection(string targetDeviceName)
+        {
+            if (_disposed)
+                return;
+
+            if (string.IsNullOrEmpty(targetDeviceName))
+                return;
+
+            var now = DateTime.UtcNow;
+            if (now - _lastConnectionCheck < ConnectionCheckInterval)
+                return;
+
+            _lastConnectionCheck = now;
+
+            var available = AvailableDevices;
+            var action = ConnectionEvaluator.Evaluate(targetDeviceName, available, IsDeviceOpen);
+
+            switch (action)
+            {
+                case ConnectionEvaluator.Action.Close:
+                    Logger.Warn($"MIDI device '{targetDeviceName}' disappeared. Will attempt to reconnect.");
+                    _retryingConnection = true;
+                    Close();
+                    break;
+
+                case ConnectionEvaluator.Action.Reopen:
+                    bool reopened = Open(targetDeviceName);
+                    if (reopened)
+                    {
+                        Logger.Info($"MIDI device '{targetDeviceName}' reconnected.");
+                    }
+                    else
+                    {
+                        Logger.Warn($"MIDI device '{targetDeviceName}' reappeared but failed to open.");
+                    }
+                    break;
+            }
         }
 
         private void OnMessageReceived(object? sender, MidiInMessageEventArgs e)

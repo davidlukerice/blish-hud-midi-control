@@ -76,6 +76,7 @@ namespace DavidRice.BlishHud.MidiControl.UI
                 AutoSizeWidth = true,
                 TextColor = Color.Gray,
             };
+            _module.StatusLabel = _statusLabel;
             y += _statusLabel.Height + 20;
 
             // ---- Keymap Section ----

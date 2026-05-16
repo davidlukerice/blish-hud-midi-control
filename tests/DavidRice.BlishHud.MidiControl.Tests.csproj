@@ -93,6 +93,9 @@
     <Compile Include="Core\KeySenderTests.cs">
       <Link>Core\KeySenderTests.cs</Link>
     </Compile>
+    <Compile Include="Core\MidiInputManagerTests.cs">
+      <Link>Core\MidiInputManagerTests.cs</Link>
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import

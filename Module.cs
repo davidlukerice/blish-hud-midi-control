@@ -53,6 +53,7 @@ namespace DavidRice.BlishHud.MidiControl
         private CornerIcon? _cornerIcon;
         private Texture2D? _activeIconTexture;
         private Texture2D? _mutedIconTexture;
+        private Texture2D? _disconnectedIconTexture;
         private TabbedWindow2? _settingsWindow;
         private Blish_HUD.Content.AsyncTexture2D? _settingsTabIcon;
 
@@ -133,8 +134,25 @@ namespace DavidRice.BlishHud.MidiControl
             await Task.CompletedTask;
         }
 
+        private bool _wasRetrying;
+
         protected override void Update(GameTime gameTime)
         {
+            bool isRetrying = _midiInputManager.IsRetryingConnection;
+
+            _midiInputManager.CheckConnection(_selectedMidiDeviceName.Value);
+
+            // Refresh corner icon if retrying state changed (disconnect/reconnect).
+            if (isRetrying != _wasRetrying)
+            {
+                _wasRetrying = isRetrying;
+                UpdateCornerIconState();
+            }
+
+            // Push live status to the settings panel if it's open.
+            if (StatusLabel != null)
+                StatusLabel.Text = MidiDeviceStatus;
+
             while (_midiQueue.TryDequeue(out Core.MidiNoteEvent noteEvent))
             {
                 if (!_sendNotes.Value)
@@ -163,6 +181,7 @@ namespace DavidRice.BlishHud.MidiControl
 
             _settingsWindow?.Dispose();
             _settingsWindow = null;
+            StatusLabel = null;
 
             _cornerIcon?.Dispose();
             _cornerIcon = null;
@@ -170,6 +189,8 @@ namespace DavidRice.BlishHud.MidiControl
             _activeIconTexture = null;
             _mutedIconTexture?.Dispose();
             _mutedIconTexture = null;
+            _disconnectedIconTexture?.Dispose();
+            _disconnectedIconTexture = null;
 
             _keySendThread?.Dispose();
             _keySendThread = null!;
@@ -191,6 +212,7 @@ namespace DavidRice.BlishHud.MidiControl
                     var gd = ctx.GraphicsDevice;
                     _activeIconTexture = CreateSolidTexture(gd, Color.Green, 16);
                     _mutedIconTexture = CreateSolidTexture(gd, Color.Gray, 16);
+                    _disconnectedIconTexture = CreateSolidTexture(gd, Color.Orange, 16);
 
                     var tabIconTex = CreateSolidTexture(gd, Color.FromNonPremultiplied(194, 181, 145, 255), 32);
                     _settingsTabIcon = new Blish_HUD.Content.AsyncTexture2D(tabIconTex);
@@ -243,6 +265,13 @@ namespace DavidRice.BlishHud.MidiControl
         {
             if (_cornerIcon == null) return;
 
+            if (_midiInputManager?.IsRetryingConnection == true)
+            {
+                _cornerIcon.Icon = _disconnectedIconTexture;
+                _cornerIcon.BasicTooltipText = $"{Name} — Disconnected";
+                return;
+            }
+
             _cornerIcon.Icon = _sendNotes.Value ? _activeIconTexture : _mutedIconTexture;
             _cornerIcon.BasicTooltipText = $"{Name} — {(_sendNotes.Value ? "Active" : "Muted")}";
         }
@@ -293,7 +322,7 @@ namespace DavidRice.BlishHud.MidiControl
             return null;
         }
 
-        // ---- Public API for Settings View ----
+        internal Label? StatusLabel { get; set; }
 
         public IReadOnlyList<string> AvailableMidiDevices => Core.MidiInputManager.AvailableDevices;
         public IReadOnlyList<Keymap> AvailableKeymaps => _keymapRegistry.AllKeymaps;
@@ -329,6 +358,8 @@ namespace DavidRice.BlishHud.MidiControl
         {
             get
             {
+                if (_midiInputManager?.IsRetryingConnection == true)
+                    return $"Disconnected — retrying (was: {_selectedMidiDeviceName.Value})";
                 if (_midiInputManager?.IsDeviceOpen == true && !string.IsNullOrEmpty(_midiInputManager.ActiveDeviceName))
                     return $"Connected: {_midiInputManager.ActiveDeviceName}";
                 if (!string.IsNullOrEmpty(_selectedMidiDeviceName.Value))

@@ -79,6 +79,7 @@
     <Compile Include="src\Keymaps\BuiltIn\MinstrelAutoKeymap.cs" />
     <Compile Include="src\Core\KeySendThread.cs" />
     <Compile Include="src\Core\MidiInputManager.cs" />
+    <Compile Include="src\Core\ConnectionEvaluator.cs" />
     <Compile Include="src\Core\MidiNoteEvent.cs" />
     <Compile Include="src\Core\MidiNote.cs" />
     <Compile Include="src\Core\KeySender.cs" />
