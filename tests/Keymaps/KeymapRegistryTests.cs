@@ -7,13 +7,71 @@ namespace DavidRice.BlishHud.MidiControl.Tests.Keymaps
     public class KeymapRegistryTests
     {
         [Test]
+        public void ConstructorRegistersAllBuiltInKeymaps()
+        {
+            var registry = new KeymapRegistry();
+
+            Assert.That(registry.AllKeymaps.Count, Is.EqualTo(6));
+        }
+
+        [Test]
         public void ConstructorRegistersMinstrelAuto()
         {
             var registry = new KeymapRegistry();
 
-            Assert.That(registry.AllKeymaps.Count, Is.EqualTo(1));
-            Assert.That(registry.AllKeymaps[0].Id, Is.EqualTo("minstrel-auto"));
-            Assert.That(registry.AllKeymaps[0].Name, Is.EqualTo("The Minstrel (Auto)"));
+            var found = registry.FindById("minstrel-auto");
+            Assert.That(found, Is.Not.Null);
+            Assert.That(found!.Name, Is.EqualTo("The Minstrel (Auto)"));
+        }
+
+        [Test]
+        public void ConstructorRegistersGrandPianoAuto()
+        {
+            var registry = new KeymapRegistry();
+
+            var found = registry.FindById("grand-piano-auto");
+            Assert.That(found, Is.Not.Null);
+            Assert.That(found!.Name, Is.EqualTo("Ornate Grand Piano (Auto)"));
+        }
+
+        [Test]
+        public void ConstructorRegistersChoirBellAuto()
+        {
+            var registry = new KeymapRegistry();
+
+            var found = registry.FindById("choir-bell-auto");
+            Assert.That(found, Is.Not.Null);
+            Assert.That(found!.Name, Is.EqualTo("Magnanimous Choir Bell (Auto)"));
+        }
+
+        [Test]
+        public void ConstructorRegistersFluteCAuto()
+        {
+            var registry = new KeymapRegistry();
+
+            var found = registry.FindById("flute-c-auto");
+            Assert.That(found, Is.Not.Null);
+            Assert.That(found!.Name, Is.EqualTo("Flute (C) (Auto)"));
+        }
+
+        [Test]
+        public void ConstructorRegistersFluteEAuto()
+        {
+            var registry = new KeymapRegistry();
+
+            var found = registry.FindById("flute-e-auto");
+            Assert.That(found, Is.Not.Null);
+            Assert.That(found!.Name, Is.EqualTo("Flute (E) (Auto)"));
+        }
+
+        [Test]
+        public void ConstructorRegistersMinstrelNonAuto()
+        {
+            var registry = new KeymapRegistry();
+
+            var found = registry.FindById("minstrel");
+            Assert.That(found, Is.Not.Null);
+            Assert.That(found!.Name, Is.EqualTo("The Minstrel"));
         }
 
         [Test]
@@ -66,7 +124,7 @@ namespace DavidRice.BlishHud.MidiControl.Tests.Keymaps
 
             registry.Register(custom);
 
-            Assert.That(registry.AllKeymaps.Count, Is.EqualTo(2));
+            Assert.That(registry.AllKeymaps.Count, Is.EqualTo(7));
             Assert.That(registry.FindById("custom-1"), Is.SameAs(custom));
         }
     }

@@ -12,7 +12,12 @@ namespace DavidRice.BlishHud.MidiControl.Keymaps
 
         public KeymapRegistry()
         {
+            Register(GrandPianoAutoKeymap.Instance);
             Register(MinstrelAutoKeymap.Instance);
+            Register(MinstrelKeymap.Instance);
+            Register(ChoirBellAutoKeymap.Instance);
+            Register(FluteCAutoKeymap.Instance);
+            Register(FluteEAutoKeymap.Instance);
         }
 
         public IReadOnlyList<Keymap> AllKeymaps => _keymaps.AsReadOnly();
