@@ -14,6 +14,8 @@ namespace DavidRice.BlishHud.MidiControl.UI
     /// </summary>
     public class MidiSettingsView
     {
+        private static readonly Blish_HUD.Logger Logger = Blish_HUD.Logger.GetLogger<MidiSettingsView>();
+
         private readonly MidiModule _module;
 
         private Dropdown? _deviceDropdown;
@@ -183,26 +185,43 @@ namespace DavidRice.BlishHud.MidiControl.UI
         private void RefreshDevices()
         {
             if (_deviceDropdown == null) return;
+
             _deviceDropdown.ValueChanged -= OnDeviceSelected;
             _deviceDropdown.Items.Clear();
 
-            var devices = _module.AvailableMidiDevices;
-            if (devices.Count == 0)
+            try
             {
-                _deviceDropdown.Items.Add("No MIDI devices found");
-                _deviceDropdown.Enabled = false;
-            }
-            else
-            {
-                foreach (var device in devices)
-                    _deviceDropdown.Items.Add(device);
-                _deviceDropdown.Enabled = true;
+                var devices = _module.AvailableMidiDevices;
+                Logger.Info($"MidiInputManager reports {devices.Count} MIDI device(s).");
 
-                string? saved = _module.SelectedMidiDeviceName;
-                if (!string.IsNullOrEmpty(saved) && _deviceDropdown.Items.Contains(saved))
-                    _deviceDropdown.SelectedItem = saved;
-                else if (_deviceDropdown.Items.Count > 0)
-                    _deviceDropdown.SelectedItem = _deviceDropdown.Items[0];
+                if (devices.Count == 0)
+                {
+                    Logger.Info("No MIDI devices detected by NAudio.");
+                    _deviceDropdown.Items.Add("No MIDI devices found");
+                    _deviceDropdown.Enabled = false;
+                }
+                else
+                {
+                    foreach (var device in devices)
+                    {
+                        Logger.Info($"  MIDI device: {device}");
+                        _deviceDropdown.Items.Add(device);
+                    }
+
+                    _deviceDropdown.Enabled = true;
+
+                    string? saved = _module.SelectedMidiDeviceName;
+                    if (!string.IsNullOrEmpty(saved) && _deviceDropdown.Items.Contains(saved))
+                        _deviceDropdown.SelectedItem = saved;
+                    else if (_deviceDropdown.Items.Count > 0)
+                        _deviceDropdown.SelectedItem = _deviceDropdown.Items[0];
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Error($"RefreshDevices failed: {ex.Message}");
+                _deviceDropdown.Items.Add($"Error: {ex.Message}");
+                _deviceDropdown.Enabled = false;
             }
 
             _deviceDropdown.ValueChanged += OnDeviceSelected;
