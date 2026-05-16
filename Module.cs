@@ -432,19 +432,15 @@ namespace DavidRice.BlishHud.MidiControl
             {
                 Logger.Info($"DoBuild called. Panel size: {buildPanel.Size}");
 
-                var testLabel = new Label
+                var panel = new Panel
                 {
                     Parent = buildPanel,
-                    Text = "BUILD RAN OK",
-                    Location = new Point(100, 20),
-                    AutoSizeHeight = true,
-                    AutoSizeWidth = true,
-                    TextColor = Color.Yellow,
+                    Size = buildPanel.Size,
                 };
 
                 try
                 {
-                    new MidiSettingsView(_module).Build((Panel)buildPanel);
+                    new MidiSettingsView(_module).Build(panel);
                 }
                 catch (Exception ex)
                 {

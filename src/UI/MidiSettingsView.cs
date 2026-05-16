@@ -227,6 +227,11 @@ namespace DavidRice.BlishHud.MidiControl.UI
             }
 
             _deviceDropdown.ValueChanged += OnDeviceSelected;
+
+            // Trigger device open for the initially-selected device
+            // (set while the handler was detached above).
+            if (_deviceDropdown.SelectedItem != null)
+                OnDeviceSelected(null, EventArgs.Empty);
         }
 
         private void OnDeviceSelected(object? sender, EventArgs e)
