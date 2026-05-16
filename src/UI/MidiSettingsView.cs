@@ -30,17 +30,19 @@ namespace DavidRice.BlishHud.MidiControl.UI
 
         public void Build(Panel buildPanel)
         {
+            Logger.Info("MidiSettingsView.Build() called.");
             buildPanel.CanScroll = true;
             buildPanel.ShowTint = true;
 
-            int y = 10;
+            int x = 95;
+            int y = 40;
 
             // ---- MIDI Device Section ----
             var deviceHeader = new Label
             {
                 Parent = buildPanel,
                 Text = "MIDI Device",
-                Location = new Point(10, y),
+                Location = new Point(x, y),
                 TextColor = Color.FromNonPremultiplied(194, 181, 145, 255),
                 AutoSizeHeight = true,
                 AutoSizeWidth = true,
@@ -50,7 +52,7 @@ namespace DavidRice.BlishHud.MidiControl.UI
             _deviceDropdown = new Dropdown
             {
                 Parent = buildPanel,
-                Location = new Point(10, y),
+                Location = new Point(x, y),
                 Width = 270,
             };
             _deviceDropdown.ValueChanged += OnDeviceSelected;
@@ -59,7 +61,7 @@ namespace DavidRice.BlishHud.MidiControl.UI
             {
                 Parent = buildPanel,
                 Text = "Refresh",
-                Location = new Point(290, y),
+                Location = new Point(375, y),
                 Width = 80,
             };
             refreshBtn.Click += (s, e) => RefreshDevices();
@@ -69,7 +71,7 @@ namespace DavidRice.BlishHud.MidiControl.UI
             {
                 Parent = buildPanel,
                 Text = _module.MidiDeviceStatus,
-                Location = new Point(10, y),
+                Location = new Point(x, y),
                 AutoSizeHeight = true,
                 AutoSizeWidth = true,
                 TextColor = Color.Gray,
@@ -81,7 +83,7 @@ namespace DavidRice.BlishHud.MidiControl.UI
             {
                 Parent = buildPanel,
                 Text = "Keymap",
-                Location = new Point(10, y),
+                Location = new Point(x, y),
                 TextColor = Color.FromNonPremultiplied(194, 181, 145, 255),
                 AutoSizeHeight = true,
                 AutoSizeWidth = true,
@@ -91,7 +93,7 @@ namespace DavidRice.BlishHud.MidiControl.UI
             _keymapDropdown = new Dropdown
             {
                 Parent = buildPanel,
-                Location = new Point(10, y),
+                Location = new Point(x, y),
                 Width = 270,
             };
             _keymapDropdown.ValueChanged += OnKeymapSelected;
@@ -102,7 +104,7 @@ namespace DavidRice.BlishHud.MidiControl.UI
             {
                 Parent = buildPanel,
                 Text = "Send Notes",
-                Location = new Point(10, y),
+                Location = new Point(x, y),
                 Checked = _module.SendNotesEnabled,
             };
             sendNotesCb.CheckedChanged += (s, e) => _module.SendNotesEnabled = e.Checked;
@@ -112,7 +114,7 @@ namespace DavidRice.BlishHud.MidiControl.UI
             {
                 Parent = buildPanel,
                 Text = "Auto Swap Octave",
-                Location = new Point(10, y),
+                Location = new Point(x, y),
                 Checked = _module.AutoSwapOctaveEnabled,
             };
             autoSwapCb.CheckedChanged += (s, e) => _module.AutoSwapOctaveEnabled = e.Checked;
@@ -122,7 +124,7 @@ namespace DavidRice.BlishHud.MidiControl.UI
             {
                 Parent = buildPanel,
                 Text = "Focus Guard",
-                Location = new Point(10, y),
+                Location = new Point(x, y),
                 Checked = _module.FocusGuardEnabled,
             };
             focusGuardCb.CheckedChanged += (s, e) => _module.FocusGuardEnabled = e.Checked;
@@ -133,7 +135,7 @@ namespace DavidRice.BlishHud.MidiControl.UI
             {
                 Parent = buildPanel,
                 Text = $"Multi-Octave Shift Delay: {_module.MultipleOctaveShiftDelay} ms",
-                Location = new Point(10, y),
+                Location = new Point(x, y),
                 AutoSizeHeight = true,
                 AutoSizeWidth = true,
             };
@@ -142,7 +144,7 @@ namespace DavidRice.BlishHud.MidiControl.UI
             var delaySlider = new TrackBar
             {
                 Parent = buildPanel,
-                Location = new Point(10, y),
+                Location = new Point(x, y),
                 MinValue = 0,
                 MaxValue = 500,
                 Value = _module.MultipleOctaveShiftDelay,
@@ -160,7 +162,7 @@ namespace DavidRice.BlishHud.MidiControl.UI
             {
                 Parent = buildPanel,
                 Text = "Recent Sends",
-                Location = new Point(10, y),
+                Location = new Point(x, y),
                 TextColor = Color.FromNonPremultiplied(194, 181, 145, 255),
                 AutoSizeHeight = true,
                 AutoSizeWidth = true,
@@ -171,7 +173,7 @@ namespace DavidRice.BlishHud.MidiControl.UI
             {
                 Parent = buildPanel,
                 Text = _module.LastSendLog,
-                Location = new Point(10, y),
+                Location = new Point(x, y),
                 AutoSizeHeight = true,
                 Width = 400,
                 WrapText = true,

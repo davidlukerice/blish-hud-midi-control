@@ -53,7 +53,8 @@ namespace DavidRice.BlishHud.MidiControl
         private CornerIcon? _cornerIcon;
         private Texture2D? _activeIconTexture;
         private Texture2D? _mutedIconTexture;
-        private TabbedWindow? _settingsWindow;
+        private TabbedWindow2? _settingsWindow;
+        private Blish_HUD.Content.AsyncTexture2D? _settingsTabIcon;
 
         [ImportingConstructor]
         public MidiModule([Import("ModuleParameters")] ModuleParameters moduleParameters) : base(moduleParameters) { }
@@ -65,39 +66,39 @@ namespace DavidRice.BlishHud.MidiControl
             _selectedMidiDeviceName = settings.DefineSetting(
                 "SelectedMidiDeviceName",
                 string.Empty,
-                "Selected MIDI Device",
-                "Name of the MIDI input device used for playing.");
+                () => "Selected MIDI Device",
+                () => "Name of the MIDI input device used for playing.");
 
             _selectedKeymapId = settings.DefineSetting(
                 "SelectedKeymapId",
                 "minstrel-auto",
-                "Selected Keymap",
-                "The active keymap that maps MIDI notes to in-game keys.");
+                () => "Selected Keymap",
+                () => "The active keymap that maps MIDI notes to in-game keys.");
 
             _sendNotes = settings.DefineSetting(
                 "SendNotes",
                 true,
-                "Send Notes",
-                "If enabled, MIDI notes are sent as GW2 keyboard keypresses.");
+                () => "Send Notes",
+                () => "If enabled, MIDI notes are sent as GW2 keyboard keypresses.");
             _sendNotes.SettingChanged += OnSendNotesChanged;
             _selectedKeymapId.SettingChanged += OnKeymapChanged;
 
             _autoSwapOctave = settings.DefineSetting(
                 "AutoSwapOctave",
                 true,
-                "Auto Swap Octave",
-                "Automatically shift octaves when playing notes outside the current range.");
+                () => "Auto Swap Octave",
+                () => "Automatically shift octaves when playing notes outside the current range.");
 
             _multipleOctaveShiftDelay = settings.DefineSetting(
                 "MultipleOctaveShiftDelay",
                 75,
-                "Multi-Octave Shift Delay (ms)",
-                "Delay between octave shift keypresses when shifting multiple octaves.");
+                () => "Multi-Octave Shift Delay (ms)",
+                () => "Delay between octave shift keypresses when shifting multiple octaves.");
             _focusGuard = settings.DefineSetting(
                 "FocusGuard",
                 true,
-                "Focus Guard",
-                "Block key sending when Guild Wars 2 is not in focus.");
+                () => "Focus Guard",
+                () => "Block key sending when Guild Wars 2 is not in focus.");
         }
 
         protected override void Initialize()
@@ -190,6 +191,9 @@ namespace DavidRice.BlishHud.MidiControl
                     var gd = ctx.GraphicsDevice;
                     _activeIconTexture = CreateSolidTexture(gd, Color.Green, 16);
                     _mutedIconTexture = CreateSolidTexture(gd, Color.Gray, 16);
+
+                    var tabIconTex = CreateSolidTexture(gd, Color.FromNonPremultiplied(194, 181, 145, 255), 32);
+                    _settingsTabIcon = new Blish_HUD.Content.AsyncTexture2D(tabIconTex);
                 }
 
                 _cornerIcon = new CornerIcon
@@ -202,14 +206,31 @@ namespace DavidRice.BlishHud.MidiControl
 
                 _cornerIcon.Click += (s, e) =>
                 {
-                    if (_settingsWindow == null)
+                    try
                     {
-                        _settingsWindow = new TabbedWindow();
-                        var settingsPanel = new Panel { CanScroll = true, ShowTint = true };
-                        new MidiSettingsView(this).Build(settingsPanel);
-                        _settingsWindow.AddTab("Settings", null, settingsPanel);
+                        Logger.Info("Corner icon clicked.");
+                        if (_settingsWindow == null)
+                        {
+                            var bg = Blish_HUD.Content.AsyncTexture2D.FromAssetId(155997);
+                            _settingsWindow = new TabbedWindow2(
+                                bg,
+                                new Rectangle(24, 30, 545, 630),
+                                new Rectangle(82, 30, 467, 600))
+                            {
+                                Parent = GameService.Graphics.SpriteScreen,
+                                Title = "MIDI Control",
+                                SavesPosition = true,
+                                Id = $"{nameof(MidiModule)}_Settings_6a2b3c4d"
+                            };
+                            _settingsWindow.Tabs.Add(new Tab(_settingsTabIcon, () => new MidiSettingsTabView(this), "Settings"));
+                            Logger.Info("Settings window created.");
+                        }
+                        _settingsWindow.ToggleWindow();
                     }
-                    _settingsWindow.ToggleWindow();
+                    catch (Exception ex)
+                    {
+                        Logger.Error($"Corner icon click failed: {ex}");
+                    }
                 };
             }
             catch (Exception ex)
@@ -377,6 +398,65 @@ namespace DavidRice.BlishHud.MidiControl
                 {
                     // Ignore on unload
                 }
+            }
+        }
+
+        private sealed class MidiSettingsTabView : IView
+        {
+            private static readonly Logger Logger = Logger.GetLogger<MidiSettingsTabView>();
+
+            private readonly MidiModule _module;
+
+            public MidiSettingsTabView(MidiModule module)
+            {
+                _module = module;
+                Logger.Info("MidiSettingsTabView constructed.");
+            }
+
+            public bool WithPresenter => false;
+
+#pragma warning disable CS0067
+            public event EventHandler<EventArgs>? Built;
+            public event EventHandler<EventArgs>? Loaded;
+            public event EventHandler<EventArgs>? Unloaded;
+#pragma warning restore CS0067
+
+            public Task<bool> DoLoad(IProgress<string> progress)
+            {
+                Logger.Info("DoLoad called.");
+                progress.Report("MIDI Control settings loaded.");
+                return Task.FromResult(true);
+            }
+
+            public void DoBuild(Container buildPanel)
+            {
+                Logger.Info($"DoBuild called. Panel size: {buildPanel.Size}");
+
+                var testLabel = new Label
+                {
+                    Parent = buildPanel,
+                    Text = "BUILD RAN OK",
+                    Location = new Point(100, 20),
+                    AutoSizeHeight = true,
+                    AutoSizeWidth = true,
+                    TextColor = Color.Yellow,
+                };
+
+                try
+                {
+                    new MidiSettingsView(_module).Build((Panel)buildPanel);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error($"Build threw: {ex}");
+                }
+
+                Logger.Info("DoBuild complete.");
+            }
+
+            public void DoUnload()
+            {
+                Logger.Info("DoUnload called.");
             }
         }
     }
