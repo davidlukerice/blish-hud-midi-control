@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Blish_HUD;
 using Blish_HUD.Controls;
 using Blish_HUD.Graphics.UI;
+using Blish_HUD.Input;
 using Blish_HUD.Modules;
 using Blish_HUD.Modules.Managers;
 using Blish_HUD.Settings;
@@ -38,6 +39,7 @@ namespace DavidRice.BlishHud.MidiControl
         private SettingEntry<bool> _autoSwapOctave = null!;
         private SettingEntry<int> _multipleOctaveShiftDelay = null!;
         private SettingEntry<bool> _focusGuard = null!;
+        private SettingEntry<KeyBinding> _toggleSendNotesKeybind = null!;
 
         // ---- Subsystems ----
         private readonly ConcurrentQueue<Core.MidiNoteEvent> _midiQueue = new ConcurrentQueue<Core.MidiNoteEvent>();
@@ -100,6 +102,12 @@ namespace DavidRice.BlishHud.MidiControl
                 true,
                 () => "Focus Guard",
                 () => "Block key sending when Guild Wars 2 is not in focus.");
+
+            _toggleSendNotesKeybind = settings.DefineSetting(
+                "ToggleSendNotesKeybind",
+                new KeyBinding(),
+                () => "Toggle Send Notes",
+                () => "Keybind to toggle Send Notes on or off.");
         }
 
         protected override void Initialize()
@@ -117,6 +125,11 @@ namespace DavidRice.BlishHud.MidiControl
 
             _keySender = new Core.KeySender(_keySendThread);
             _keySender.NoteProcessed += OnNoteProcessed;
+
+            _toggleSendNotesKeybind.Value.Enabled = true;
+            _toggleSendNotesKeybind.Value.BlockSequenceFromGw2 = true;
+            _toggleSendNotesKeybind.Value.IgnoreWhenInTextField = false;
+            _toggleSendNotesKeybind.Value.Activated += OnToggleSendNotesKeybind;
 
             CreateCornerIcon();
             UpdateCornerIconState();
@@ -178,6 +191,8 @@ namespace DavidRice.BlishHud.MidiControl
             _sendNotes.SettingChanged -= OnSendNotesChanged;
             _selectedKeymapId.SettingChanged -= OnKeymapChanged;
             _keySender.NoteProcessed -= OnNoteProcessed;
+            _toggleSendNotesKeybind.Value.Enabled = false;
+            _toggleSendNotesKeybind.Value.Activated -= OnToggleSendNotesKeybind;
 
             _settingsWindow?.Dispose();
             _settingsWindow = null;
@@ -279,6 +294,11 @@ namespace DavidRice.BlishHud.MidiControl
         private void OnSendNotesChanged(object sender, ValueChangedEventArgs<bool> e)
         {
             UpdateCornerIconState();
+        }
+
+        private void OnToggleSendNotesKeybind(object sender, EventArgs e)
+        {
+            _sendNotes.Value = !_sendNotes.Value;
         }
 
         private void OnKeymapChanged(object sender, ValueChangedEventArgs<string> e)

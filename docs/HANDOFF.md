@@ -2,7 +2,7 @@
 
 ## Completed Work (Ready)
 
-Chunks 1–9, 13–15 plus settings UI are fully implemented and unit-tested (84 tests passing):
+Chunks 1–10, 13–15 plus settings UI are fully implemented and unit-tested (84 tests passing):
 - Domain model: `NoteDefinition`, `Keymap`
 - Built-in keymap: `MinstrelAutoKeymap`
 - `KeymapRegistry`
@@ -14,6 +14,7 @@ Chunks 1–9, 13–15 plus settings UI are fully implemented and unit-tested (84
 - `ConnectionEvaluator` — pure function for device connect/disconnect/reconnect logic
 - **Auto-reconnect** — `MidiInputManager.CheckConnection()` polls `AvailableDevices` every 10s, closes dead handles, reopens when device reappears; `MidiDeviceStatus` shows "Disconnected — retrying" state; status label in settings UI updates live each frame
 - **Corner icon states** — green (active), gray (muted), orange (disconnected/retrying). Icon and tooltip update automatically on disconnect/reconnect and on Send Notes toggle.
+- **Toggle keybind** — `ToggleSendNotesKeybind` setting, `Activated` handler flips `_sendNotes`, unbound by default, `BlockSequenceFromGw2=true`, `IgnoreWhenInTextField=false`
 - **`KeySender` wired into `Module.cs`** — `Update()` drains queue, respects settings, keymap fallback
 - **`MidiSettingsView`** — custom settings panel with device dropdown, keymap dropdown, toggles, delay slider, and recent-send log
 - **`TabbedWindow2` settings** — opens on corner icon click, renders correctly with content offset
@@ -24,11 +25,11 @@ Chunks 1–9, 13–15 plus settings UI are fully implemented and unit-tested (84
   - `AddTab(name, icon, Panel)` → `Tabs.Add(new Tab(icon, Func<IView>, name))` via `MidiSettingsTabView : IView`
 - **MIDI device selection fixed** — dropdown populates, auto-selects and opens device on first load, status label updates
 
+Chunk 10 (toggle keybind) is now complete.
+
 ## Remaining Work
 
-| # | Name | Files | Verifiable because |
-|---|---|---|---|
-| 10 | **Toggle keybind** | `Module.cs` | Keybind registration compiles; integration tested at runtime |
+_(none — all chunks complete)_
 
 ## Important Notes
 
