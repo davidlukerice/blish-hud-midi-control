@@ -2,7 +2,7 @@
 
 ## Completed Work (Ready)
 
-Chunks 1–9, 14, and 15 plus settings UI are fully implemented and unit-tested (84 tests passing):
+Chunks 1–9, 13–15 plus settings UI are fully implemented and unit-tested (84 tests passing):
 - Domain model: `NoteDefinition`, `Keymap`
 - Built-in keymap: `MinstrelAutoKeymap`
 - `KeymapRegistry`
@@ -29,7 +29,6 @@ Chunks 1–9, 14, and 15 plus settings UI are fully implemented and unit-tested 
 | # | Name | Files | Verifiable because |
 |---|---|---|---|
 | 10 | **Toggle keybind** | `Module.cs` | Keybind registration compiles; integration tested at runtime |
-| 13 | **Build/package** | `.csproj`, post-build | Clean build, `.bhm` post-build xcopy restored, stale packages removed |
 
 ## Important Notes
 
@@ -42,7 +41,14 @@ Chunks 1–9, 14, and 15 plus settings UI are fully implemented and unit-tested 
 
 ## Next Chunk
 
-**Chunk 10: Toggle keybind** or **Chunk 13: Build/package** — whichever you prefer.
+**Chunk 10: Toggle keybind**
+
+## Chunk 13 Details
+
+- **Stale packages removed**: 25 stale package directories deleted from `packages/` (old BlishHUD 0.5.2, MonoGame 3.7.x, NAudio 2.0–2.2.x, Newtonsoft 12, Gw2Sharp 0.10, etc.)
+- **`packages.config` cleaned**: removed 4 dead entries (`NAudio.Wasapi`, `System.ComponentModel.Composition`, `System.Resources.Extensions`, `System.ServiceModel.Primitives`); added `NAudio.Core 2.3.0` and `NAudio.Midi 2.3.0`
+- **NAudio references fixed**: `.csproj` paths changed from absolute `~/.nuget` paths to relative `packages/` paths (works on other machines)
+- **Post-build xcopy restored**: MSBuild target `CopyBhmToModules` runs after `BuildBlishHUDModule`, copies `.bhm` to `%USERPROFILE%\Documents\Guild Wars 2\addons\blishhud\modules\`
 
 ## Chunk 9 Details
 

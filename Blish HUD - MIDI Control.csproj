@@ -219,7 +219,7 @@
             Include="NAudio.Core, Version=2.3.0.0, Culture=neutral, PublicKeyToken=null, processorArchitecture=MSIL"
         >
       <HintPath
-            >C:\Users\david\.nuget\packages\naudio.core\2.3.0\lib\netstandard2.0\NAudio.Core.dll</HintPath>
+            >packages\NAudio.Core.2.3.0\lib\netstandard2.0\NAudio.Core.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
       <Private>True</Private>
     </Reference>
@@ -227,7 +227,7 @@
             Include="NAudio.Midi, Version=2.3.0.0, Culture=neutral, PublicKeyToken=null, processorArchitecture=MSIL"
         >
       <HintPath
-            >C:\Users\david\.nuget\packages\naudio.midi\2.3.0\lib\netstandard2.0\NAudio.Midi.dll</HintPath>
+            >packages\NAudio.Midi.2.3.0\lib\netstandard2.0\NAudio.Midi.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
       <Private>True</Private>
     </Reference>
@@ -330,6 +330,9 @@
     <PostBuildEvent>
     </PostBuildEvent>
   </PropertyGroup>
+  <Target Name="CopyBhmToModules" AfterTargets="BuildBlishHUDModule">
+    <Exec Command="xcopy /Y &quot;$(TargetDir)$(TargetName).bhm&quot; &quot;%25USERPROFILE%25\Documents\Guild Wars 2\addons\blishhud\modules\&quot;" />
+  </Target>
   <Import
         Project="packages\MonoGame.Framework.WindowsDX.3.8.0.1641\build\MonoGame.Framework.WindowsDX.targets"
         Condition="Exists('packages\MonoGame.Framework.WindowsDX.3.8.0.1641\build\MonoGame.Framework.WindowsDX.targets')"
