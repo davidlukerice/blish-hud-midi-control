@@ -101,17 +101,25 @@ namespace DavidRice.BlishHud.MidiControl.UI
             _keymapDropdown.ValueChanged += OnKeymapSelected;
             y += _keymapDropdown.Height + 6;
 
-            _previewLabel = new Label
+            var previewPanel = new Panel
             {
                 Parent = buildPanel,
-                Text = "",
                 Location = new Point(x, y),
+                Size = new Point(365, 140),
+                CanScroll = true,
+            };
+
+            _previewLabel = new Label
+            {
+                Parent = previewPanel,
+                Text = "",
+                Location = new Point(0, 0),
                 AutoSizeHeight = true,
-                Width = 400,
+                Width = 350,
                 WrapText = true,
                 TextColor = Color.LightGray,
             };
-            y += _previewLabel.Height + 20;
+            y += previewPanel.Height + 20;
 
             // ---- Standard Toggles ----
             var sendNotesCb = new Checkbox
