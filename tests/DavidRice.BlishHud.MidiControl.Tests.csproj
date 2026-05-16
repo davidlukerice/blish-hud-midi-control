@@ -78,6 +78,9 @@
     <Compile Include="Keymaps\KeymapRegistryTests.cs">
       <Link>Keymaps\KeymapRegistryTests.cs</Link>
     </Compile>
+    <Compile Include="Keymaps\KeymapPreviewFormatterTests.cs">
+      <Link>Keymaps\KeymapPreviewFormatterTests.cs</Link>
+    </Compile>
     <Compile Include="Input\SendInputApiTests.cs">
       <Link>Input\SendInputApiTests.cs</Link>
     </Compile>

@@ -22,6 +22,7 @@ namespace DavidRice.BlishHud.MidiControl.UI
         private Label? _statusLabel;
         private Dropdown? _keymapDropdown;
         private Label? _logLabel;
+        private Label? _previewLabel;
 
         public MidiSettingsView(MidiModule module)
         {
@@ -98,7 +99,19 @@ namespace DavidRice.BlishHud.MidiControl.UI
                 Width = 270,
             };
             _keymapDropdown.ValueChanged += OnKeymapSelected;
-            y += _keymapDropdown.Height + 20;
+            y += _keymapDropdown.Height + 6;
+
+            _previewLabel = new Label
+            {
+                Parent = buildPanel,
+                Text = "",
+                Location = new Point(x, y),
+                AutoSizeHeight = true,
+                Width = 400,
+                WrapText = true,
+                TextColor = Color.LightGray,
+            };
+            y += _previewLabel.Height + 20;
 
             // ---- Standard Toggles ----
             var sendNotesCb = new Checkbox
@@ -266,6 +279,7 @@ namespace DavidRice.BlishHud.MidiControl.UI
                 _keymapDropdown.SelectedItem = _keymapDropdown.Items[0];
 
             _keymapDropdown.ValueChanged += OnKeymapSelected;
+            RefreshPreview();
         }
 
         private void OnKeymapSelected(object? sender, EventArgs e)
@@ -276,7 +290,33 @@ namespace DavidRice.BlishHud.MidiControl.UI
             var keymap = _module.AvailableKeymaps
                 .FirstOrDefault(k => k.Name == selectedName);
             if (keymap != null)
+            {
                 _module.SelectKeymap(keymap.Id);
+                RefreshPreview();
+            }
+        }
+
+        private void RefreshPreview()
+        {
+            if (_previewLabel == null) return;
+
+            var selectedName = _keymapDropdown?.SelectedItem;
+            if (string.IsNullOrEmpty(selectedName))
+            {
+                _previewLabel.Text = "";
+                return;
+            }
+
+            var keymap = _module.AvailableKeymaps
+                .FirstOrDefault(k => k.Name == selectedName);
+            if (keymap == null)
+            {
+                _previewLabel.Text = "";
+                return;
+            }
+
+            var lines = KeymapPreviewFormatter.FormatLines(keymap);
+            _previewLabel.Text = string.Join("\n", lines);
         }
     }
 }

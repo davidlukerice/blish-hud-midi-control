@@ -76,6 +76,7 @@
   <ItemGroup>
     <Compile Include="src\Keymaps\NoteDefinition.cs" />
     <Compile Include="src\Keymaps\KeymapRegistry.cs" />
+    <Compile Include="src\Keymaps\KeymapPreviewFormatter.cs" />
     <Compile Include="src\Keymaps\BuiltIn\MinstrelAutoKeymap.cs" />
     <Compile Include="src\Core\KeySendThread.cs" />
     <Compile Include="src\Core\MidiInputManager.cs" />

@@ -2,7 +2,7 @@
 
 ## Completed Work (Ready)
 
-Chunks 1–10, 13–15 plus settings UI are fully implemented and unit-tested (84 tests passing):
+Chunks 1–10, 13–15 plus settings UI and keymap preview are fully implemented and unit-tested (93 tests passing):
 - Domain model: `NoteDefinition`, `Keymap`
 - Built-in keymap: `MinstrelAutoKeymap`
 - `KeymapRegistry`
@@ -16,7 +16,7 @@ Chunks 1–10, 13–15 plus settings UI are fully implemented and unit-tested (8
 - **Corner icon states** — green (active), gray (muted), orange (disconnected/retrying). Icon and tooltip update automatically on disconnect/reconnect and on Send Notes toggle.
 - **Toggle keybind** — `ToggleSendNotesKeybind` setting, `Activated` handler flips `_sendNotes`, unbound by default, `BlockSequenceFromGw2=true`, `IgnoreWhenInTextField=false`
 - **`KeySender` wired into `Module.cs`** — `Update()` drains queue, respects settings, keymap fallback
-- **`MidiSettingsView`** — custom settings panel with device dropdown, keymap dropdown, toggles, delay slider, and recent-send log
+- **`MidiSettingsView`** — custom settings panel with device dropdown, keymap dropdown, **keymap preview** showing note-to-key mapping, toggles, delay slider, and recent-send log
 - **`TabbedWindow2` settings** — opens on corner icon click, renders correctly with content offset
 - **Blish HUD 1.3.0 upgrade** — package refs updated, breaking API fixes applied, builds cleanly
 - **1.3.0 deprecation cleanup** — zero `CS0618` warnings
@@ -24,12 +24,13 @@ Chunks 1–10, 13–15 plus settings UI are fully implemented and unit-tested (8
   - `DefineSetting<T>(key, val, "name", "desc")` → `DefineSetting<T>(key, val, () => "name", () => "desc")`
   - `AddTab(name, icon, Panel)` → `Tabs.Add(new Tab(icon, Func<IView>, name))` via `MidiSettingsTabView : IView`
 - **MIDI device selection fixed** — dropdown populates, auto-selects and opens device on first load, status label updates
+- **Keymap preview** — `KeymapPreviewFormatter` static class in `src/Keymaps/`, renders one line per note sorted by octave/letter/accidental (flat < natural < sharp). Wired below keymap dropdown in settings panel; updates on selection change.
 
-Chunk 10 (toggle keybind) is now complete.
+Chunk 10 (toggle keybind) and keymap preview are now complete.
 
 ## Remaining Work
 
-_(none — all chunks complete)_
+_(none — all v1 PRD items complete)_
 
 ## Important Notes
 
@@ -39,10 +40,17 @@ _(none — all chunks complete)_
 - **Settings window** uses `TabbedWindow2` with asset 155997. The `DoBuild` receiver is a `TabbedWindow2` (not a `Panel`), so `MidiSettingsTabView` creates a child `Panel` before calling `MidiSettingsView.Build()`.
 - **Content offset**: `MidiSettingsView.Build()` uses `x=95, y=40` starting position to account for the tab sidebar (~82px) and window chrome (~30px) in the full-window container.
 - **Auto-device-open**: After `RefreshDevices()` reattaches the `ValueChanged` handler, it manually calls `OnDeviceSelected` to open the initially-selected device (since `SelectedItem` was set while the handler was detached).
+- **Keymap preview sort order**: by note-name octave number, then note letter (A-G), then accidental (flat < natural < sharp). Special notes (oct shift, internal octave) sort by their note name just like regular notes.
 
 ## Next Chunk
 
-**Chunk 10: Toggle keybind**
+All v1 PRD user stories are implemented. The follow-up items from the PRD (out of scope for v1) are available if the user wants to continue:
+- Custom JSON keymap loading from data directory
+- Additional built-in keymaps (Grand Piano, Flute C/E, Choir Bell, Minstrel non-auto)
+- `noteoff` support / true key-down hold behavior
+- In-overlay indicator showing last played note
+- Chord support for instruments with multi-key bindings
+- Configuration validation and error UI for malformed custom keymaps
 
 ## Chunk 13 Details
 
