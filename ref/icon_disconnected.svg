@@ -1,0 +1,147 @@
+<svg
+    width="64"
+    height="64"
+    viewBox="0 0 64 64"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    opacity="0.5"
+>
+  <!-- Piano keys container -->
+  <g>
+    <!-- White keys (now black fill) -->
+    <rect
+            x="8"
+            y="24"
+            width="6"
+            height="24"
+            fill="#1A1A1A"
+            stroke="#FFA500"
+            stroke-width="1.5"
+            rx="1"
+        />
+    <rect
+            x="15"
+            y="24"
+            width="6"
+            height="24"
+            fill="#1A1A1A"
+            stroke="#FFA500"
+            stroke-width="1.5"
+            rx="1"
+        />
+    <rect
+            x="22"
+            y="24"
+            width="6"
+            height="24"
+            fill="#1A1A1A"
+            stroke="#FFA500"
+            stroke-width="1.5"
+            rx="1"
+        />
+
+    <!-- Black keys (now white fill) -->
+    <rect
+            x="12"
+            y="24"
+            width="4"
+            height="15"
+            fill="#FFA500"
+            stroke="#FFA500"
+            stroke-width="1.5"
+            rx="0.5"
+        />
+    <rect
+            x="19"
+            y="24"
+            width="4"
+            height="15"
+            fill="#FFA500"
+            stroke="#FFA500"
+            stroke-width="1.5"
+            rx="0.5"
+        />
+  </g>
+
+  <!-- Connection lines with terminal circles - horizontal from right side -->
+  <g>
+    <!-- Line 1 - from top (short) -->
+    <line
+            x1="28"
+            y1="32"
+            x2="36"
+            y2="32"
+            stroke="#FFA500"
+            stroke-width="1.5"
+            stroke-linecap="round"
+        />
+    <circle
+            cx="38"
+            cy="32"
+            r="3"
+            fill="none"
+            stroke="#FFA500"
+            stroke-width="1"
+        />
+
+    <!-- Line 2 - from middle (long) -->
+    <line
+            x1="28"
+            y1="37"
+            x2="48"
+            y2="37"
+            stroke="#FFA500"
+            stroke-width="2"
+            stroke-linecap="round"
+        />
+    <circle
+            cx="50"
+            cy="37"
+            r="3"
+            fill="none"
+            stroke="#FFA500"
+            stroke-width="1"
+        />
+
+    <!-- Line 3 - from bottom (medium) -->
+    <line
+            x1="28"
+            y1="42"
+            x2="42"
+            y2="42"
+            stroke="#FFA500"
+            stroke-width="2.5"
+            stroke-linecap="round"
+        />
+    <circle
+            cx="44"
+            cy="42"
+            r="3"
+            fill="none"
+            stroke="#FFA500"
+            stroke-width="1"
+        />
+  </g>
+
+  <!-- Disconnected indicator - X mark on connection lines -->
+  <g>
+    <line
+            x1="34"
+            y1="34"
+            x2="40"
+            y2="40"
+            stroke="#FF4444"
+            stroke-width="2.5"
+            stroke-linecap="round"
+        />
+    <line
+            x1="40"
+            y1="34"
+            x2="34"
+            y2="40"
+            stroke="#FF4444"
+            stroke-width="2.5"
+            stroke-linecap="round"
+        />
+  </g>
+</svg>
