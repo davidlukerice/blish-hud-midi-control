@@ -4,6 +4,8 @@ A [Blish HUD](https://blishhud.com/) module that maps MIDI controller input to k
 
 Originally developed as a standalone Electron app ([midi-to-game-instruments](https://github.com/davidlukerice/midi-to-game-instruments)), this is a native Blish HUD port that runs directly inside the GW2 overlay.
 
+[Blish profile](https://blishhud.com/modules/?module=davidrice.blishhud.midicontrol)
+
 <img width="1262" height="849" alt="image" src="https://github.com/user-attachments/assets/f507f95c-e3fe-416a-ae73-06de8998a09a" />
 
 
