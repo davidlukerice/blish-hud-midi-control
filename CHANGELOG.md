@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.0.3] – 2026-05-24
+
+### Added
+- **Live Recent Sends log** — Settings panel now shows a real-time scrolling log with octave state, MIDI note name, and sent GW2 key(s). Entries like `oct 0→1: D4 → 0 + 2` show when an octave shift occurred.
+
+### Changed
+- **Compact settings layout** — Shifted UI elements up and left
+- **Corner icon state** — Tooltip and icon now update reliably when MIDI device disconnects/reconnects.
+
+## [0.0.2] – 2026-05-??
+
+### Added
+- **Five additional built-in keymaps** — Grand Piano, Flute C, Flute E, Choir Bell, and Minstrel (manual, non-auto).
+
 ## [0.0.1] – 2026-05-16
 
 ### Added

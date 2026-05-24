@@ -85,7 +85,7 @@ Standard toggles render automatically. The MIDI device dropdown and keymap dropd
 
 ### UI
 
-- **Corner Icon** in the Blish HUD icon bar. Active/muted states distinguished by color tint. Click opens the settings tab.
+- **Corner Icon** in the Blish HUD icon bar. Active/muted/disconnected states distinguished by color tint (green/gray/orange). Click opens the settings tab.
 - **Settings Tab** is a single tab with three logical groups (top to bottom): MIDI Device, Keymap + Preview, Standard Controls.
 - No floating overlay or note text indicator in v1.
 
@@ -130,6 +130,10 @@ The project is new; no existing tests. Pattern after standard NUnit/xUnit unit t
 - Chord support (multi-key bindings per note)
 - Configuration validation UI for malformed custom keymaps
 - Non-Guild-Wars-2 games or platforms
+
+> **Post-v1 note:** Two items from "Out of Scope" have since been implemented in v0.0.2+:
+> - Additional built-in keymaps (Grand Piano, Flute C, Flute E, Choir Bell, Minstrel non-auto)
+> - In-settings last-note indicator ("Recent Sends" scrollable log panel)
 
 ## Further Notes
 

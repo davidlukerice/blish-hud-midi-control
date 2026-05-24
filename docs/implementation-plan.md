@@ -2,11 +2,7 @@
 
 ## Phase 1 — Project Scaffold & Dependencies
 
-1. **Update project file** (`Blish HUD - MIDI Control.csproj`) ✅ DONE (namespace, LangVersion 8.0, ref assemblies)
-   - Retarget from .NET Framework 4.8 to the Blish HUD compatible version (already 4.8)
-   - Remove stale package references (`AsyncClipboardService`, unused SharpDX refs) — pending
-   - Add NAudio NuGet package — pending
-   - Ensure `Copy Local = False` on all Blish HUD dependencies
+1. **Update project file** (`Blish HUD - MIDI Control.csproj`) ✅ DONE
 
 2. **Directory structure**
    ```
@@ -159,28 +155,33 @@ Maps string key names to Win32 scan codes. Used by `KeySender` and `SendInput`.
 
 ### Corner Icon
 
-- Two states: **active** (green tint) when `SendNotes` is true, **muted** (grey tint) when false
+- Three states: **active** (green icon) when `SendNotes` is true, **muted** (gray icon) when false, **disconnected** (orange icon) when device is retrying connection.
 - On click: open the module's settings tab
 
 ### Settings Tab UI
 
-Blish HUD `SettingView` with a custom panel. Layout top-to-bottom:
+Blish HUD `IView` with a custom `Panel`. Layout top-to-bottom, compact (shifted up/left to fit without scrolling):
 
 1. **MIDI Device** section
    - Label + `Dropdown` showing `AvailableDevices` (or "No devices found")
    - "Refresh" `StandardButton`
+   - Status label reflecting connection state
    - On selection change → update `_selectedMidiDeviceName` setting, call `MidiInputManager.Open`
 
 2. **Keymap** section
    - Label + `Dropdown` showing all keymap names
    - On selection change → update `_selectedKeymapId`
-   - `TextBox` or multi-line label below showing the selected keymap's notes as formatted text (`C3 → 1 (oct 0)`, `C4 → 1 (oct 1) | alt: 8 on oct 0`, etc.)
+   - Scrollable `Panel` (90px) with `Label` inside showing formatted keymap preview lines
 
-3. **Controls** section (standard auto-rendered settings)
+3. **Controls** section
    - Checkbox: Send Notes
    - Checkbox: Auto Swap Octave
-   - Slider: Multi-Octave Shift Delay (0–500ms)
    - Checkbox: Focus Guard
+   - Slider: Multi-Octave Shift Delay (0–500ms)
+
+4. **Recent Sends** section
+   - Scrollable `Panel` (90px) with live-updating `Label` showing octave state, MIDI note name, and sent GW2 key(s)
+   - Updates via `RecentSendLogUpdated` event from `MidiModule`
 
 ## Phase 7 — Build & Test
 
@@ -198,9 +199,10 @@ Blish HUD `SettingView` with a custom panel. Layout top-to-bottom:
 
 ## Follow-up Items (Not in Milestone 1)
 
-- [ ] Additional built-in keymaps (Grand Piano, Flute C/E, Choir Bell, Minstrel non-auto)
+- [x] Additional built-in keymaps (Grand Piano, Flute C/E, Choir Bell, Minstrel non-auto)
 - [ ] Custom JSON keymap loading from data directory
 - [ ] `noteoff` support / true key-down key-up hold behavior
-- [ ] In-overlay indicator showing last played note
+- [x] In-overlay indicator showing last played note *(implemented as scrollable Recent Sends log in settings tab)*
+- [ ] Floating overlay indicator showing last played note (outside settings tab)
 - [ ] Chord support for instruments with multi-key bindings
 - [ ] Configuration validation and error UI for malformed custom keymaps
