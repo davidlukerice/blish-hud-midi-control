@@ -81,7 +81,7 @@ namespace DavidRice.BlishHud.MidiControl.Core
             }
             catch (Exception ex)
             {
-                Logger.Warn($"Failed to open MIDI device '{deviceName}': {ex.Message}");
+                Logger.Warn($"Failed to open MIDI device '{deviceName}'.", ex);
                 _midiIn?.Dispose();
                 _midiIn = null;
                 return false;
@@ -101,7 +101,7 @@ namespace DavidRice.BlishHud.MidiControl.Core
                 }
                 catch (Exception ex)
                 {
-                    Logger.Warn($"Exception while closing MIDI device: {ex.Message}");
+                    Logger.Warn("Exception while closing MIDI device.", ex);
                 }
                 finally
                 {

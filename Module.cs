@@ -240,7 +240,6 @@ namespace DavidRice.BlishHud.MidiControl
                 {
                     try
                     {
-                        Logger.Info("Corner icon clicked.");
                         if (_settingsWindow == null)
                         {
                             var bg = Blish_HUD.Content.AsyncTexture2D.FromAssetId(155997);
@@ -255,19 +254,18 @@ namespace DavidRice.BlishHud.MidiControl
                                 Id = $"{nameof(MidiModule)}_Settings_6a2b3c4d"
                             };
                             _settingsWindow.Tabs.Add(new Tab(_settingsTabIcon, () => new MidiSettingsTabView(this), "Settings"));
-                            Logger.Info("Settings window created.");
                         }
                         _settingsWindow.ToggleWindow();
                     }
                     catch (Exception ex)
                     {
-                        Logger.Error($"Corner icon click failed: {ex}");
+                        Logger.Error("Corner icon click failed.", ex);
                     }
                 };
             }
             catch (Exception ex)
             {
-                Logger.Warn($"Failed to create corner icon: {ex.Message}");
+                Logger.Warn("Failed to create corner icon.", ex);
             }
         }
 
@@ -455,7 +453,6 @@ namespace DavidRice.BlishHud.MidiControl
             public MidiSettingsTabView(MidiModule module)
             {
                 _module = module;
-                Logger.Info("MidiSettingsTabView constructed.");
             }
 
             public bool WithPresenter => false;
@@ -468,15 +465,12 @@ namespace DavidRice.BlishHud.MidiControl
 
             public Task<bool> DoLoad(IProgress<string> progress)
             {
-                Logger.Info("DoLoad called.");
                 progress.Report("MIDI Control settings loaded.");
                 return Task.FromResult(true);
             }
 
             public void DoBuild(Container buildPanel)
             {
-                Logger.Info($"DoBuild called. Panel size: {buildPanel.Size}");
-
                 var panel = new Panel
                 {
                     Parent = buildPanel,
@@ -490,15 +484,13 @@ namespace DavidRice.BlishHud.MidiControl
                 }
                 catch (Exception ex)
                 {
-                    Logger.Error($"Build threw: {ex}");
+                    Logger.Error("Build threw.", ex);
                 }
 
-                Logger.Info("DoBuild complete.");
             }
 
             public void DoUnload()
             {
-                Logger.Info("DoUnload called.");
                 _view?.Unload();
             }
         }

@@ -32,7 +32,6 @@ namespace DavidRice.BlishHud.MidiControl.UI
 
         public void Build(Panel buildPanel)
         {
-            Logger.Info("MidiSettingsView.Build() called.");
             buildPanel.ShowTint = true;
 
             int x = 20;
@@ -231,8 +230,6 @@ namespace DavidRice.BlishHud.MidiControl.UI
             try
             {
                 var devices = _module.AvailableMidiDevices;
-                Logger.Info($"MidiInputManager reports {devices.Count} MIDI device(s).");
-
                 if (devices.Count == 0)
                 {
                     Logger.Info("No MIDI devices detected by NAudio.");
@@ -243,7 +240,6 @@ namespace DavidRice.BlishHud.MidiControl.UI
                 {
                     foreach (var device in devices)
                     {
-                        Logger.Info($"  MIDI device: {device}");
                         _deviceDropdown.Items.Add(device);
                     }
 
@@ -258,7 +254,7 @@ namespace DavidRice.BlishHud.MidiControl.UI
             }
             catch (Exception ex)
             {
-                Logger.Error($"RefreshDevices failed: {ex.Message}");
+                Logger.Error("RefreshDevices failed.", ex);
                 _deviceDropdown.Items.Add($"Error: {ex.Message}");
                 _deviceDropdown.Enabled = false;
             }
