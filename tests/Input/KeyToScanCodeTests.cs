@@ -1,3 +1,5 @@
+#nullable enable
+
 using NUnit.Framework;
 using DavidRice.BlishHud.MidiControl.Input;
 
@@ -38,10 +40,29 @@ namespace DavidRice.BlishHud.MidiControl.Tests.Input
         }
 
         [Test]
-        public void For_Empty_ReturnsNull()
+        public void GetKeyName_KnownScanCode_ReturnsKeyName()
         {
-            uint? sc = KeyToScanCode.For("");
-            Assert.That(sc, Is.Null);
+            string? name = KeyToScanCode.GetKeyName(0x02u);
+            Assert.That(name, Is.EqualTo("1"));
+        }
+
+        [Test]
+        public void GetKeyName_UnknownScanCode_ReturnsNull()
+        {
+            string? name = KeyToScanCode.GetKeyName(0xFFu);
+            Assert.That(name, Is.Null);
+        }
+
+        [TestCase("1", 0x02u)]
+        [TestCase("F1", 0x3Bu)]
+        [TestCase("SPACE", 0x39u)]
+        public void GetKeyName_RoundTripsWithFor(string key, uint scanCode)
+        {
+            uint? foundSc = KeyToScanCode.For(key);
+            Assert.That(foundSc, Is.EqualTo(scanCode), $"For failed for {key}");
+
+            string? foundName = KeyToScanCode.GetKeyName(scanCode);
+            Assert.That(foundName, Is.EqualTo(key), $"GetKeyName failed for scanCode {scanCode}");
         }
     }
 }

@@ -50,5 +50,17 @@ namespace DavidRice.BlishHud.MidiControl.Input
 
             return null;
         }
+        /// <summary>
+        /// Returns the first known key name for the given scan code, or <c>null</c> if unknown.
+        /// </summary>
+        public static string? GetKeyName(uint scanCode)
+        {
+            foreach (var kvp in Map)
+            {
+                if (kvp.Value == scanCode)
+                    return kvp.Key;
+            }
+            return null;
+        }
     }
 }

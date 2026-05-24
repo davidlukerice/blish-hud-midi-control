@@ -23,6 +23,7 @@ namespace DavidRice.BlishHud.MidiControl.UI
         private Dropdown? _keymapDropdown;
         private Label? _logLabel;
         private Label? _previewLabel;
+        private Action? _onLogUpdate;
 
         public MidiSettingsView(MidiModule module)
         {
@@ -32,11 +33,10 @@ namespace DavidRice.BlishHud.MidiControl.UI
         public void Build(Panel buildPanel)
         {
             Logger.Info("MidiSettingsView.Build() called.");
-            buildPanel.CanScroll = true;
             buildPanel.ShowTint = true;
 
-            int x = 95;
-            int y = 40;
+            int x = 20;
+            int y = 15;
 
             // ---- MIDI Device Section ----
             var deviceHeader = new Label
@@ -54,7 +54,7 @@ namespace DavidRice.BlishHud.MidiControl.UI
             {
                 Parent = buildPanel,
                 Location = new Point(x, y),
-                Width = 270,
+                Width = 220,
             };
             _deviceDropdown.ValueChanged += OnDeviceSelected;
 
@@ -62,7 +62,7 @@ namespace DavidRice.BlishHud.MidiControl.UI
             {
                 Parent = buildPanel,
                 Text = "Refresh",
-                Location = new Point(375, y),
+                Location = new Point(248, y),
                 Width = 80,
             };
             refreshBtn.Click += (s, e) => RefreshDevices();
@@ -78,7 +78,7 @@ namespace DavidRice.BlishHud.MidiControl.UI
                 TextColor = Color.Gray,
             };
             _module.StatusLabel = _statusLabel;
-            y += _statusLabel.Height + 20;
+            y += _statusLabel.Height + 10;
 
             // ---- Keymap Section ----
             var keymapHeader = new Label
@@ -90,22 +90,22 @@ namespace DavidRice.BlishHud.MidiControl.UI
                 AutoSizeHeight = true,
                 AutoSizeWidth = true,
             };
-            y += keymapHeader.Height + 6;
+            y += keymapHeader.Height + 4;
 
             _keymapDropdown = new Dropdown
             {
                 Parent = buildPanel,
                 Location = new Point(x, y),
-                Width = 270,
+                Width = 220,
             };
             _keymapDropdown.ValueChanged += OnKeymapSelected;
-            y += _keymapDropdown.Height + 6;
+            y += _keymapDropdown.Height + 4;
 
             var previewPanel = new Panel
             {
                 Parent = buildPanel,
                 Location = new Point(x, y),
-                Size = new Point(365, 140),
+                Size = new Point(420, 90),
                 CanScroll = true,
             };
 
@@ -115,11 +115,11 @@ namespace DavidRice.BlishHud.MidiControl.UI
                 Text = "",
                 Location = new Point(0, 0),
                 AutoSizeHeight = true,
-                Width = 350,
+                Width = 400,
                 WrapText = true,
                 TextColor = Color.LightGray,
             };
-            y += previewPanel.Height + 20;
+            y += previewPanel.Height + 10;
 
             // ---- Standard Toggles ----
             var sendNotesCb = new Checkbox
@@ -130,7 +130,7 @@ namespace DavidRice.BlishHud.MidiControl.UI
                 Checked = _module.SendNotesEnabled,
             };
             sendNotesCb.CheckedChanged += (s, e) => _module.SendNotesEnabled = e.Checked;
-            y += sendNotesCb.Height + 6;
+            y += sendNotesCb.Height + 4;
 
             var autoSwapCb = new Checkbox
             {
@@ -140,7 +140,7 @@ namespace DavidRice.BlishHud.MidiControl.UI
                 Checked = _module.AutoSwapOctaveEnabled,
             };
             autoSwapCb.CheckedChanged += (s, e) => _module.AutoSwapOctaveEnabled = e.Checked;
-            y += autoSwapCb.Height + 6;
+            y += autoSwapCb.Height + 4;
 
             var focusGuardCb = new Checkbox
             {
@@ -150,7 +150,7 @@ namespace DavidRice.BlishHud.MidiControl.UI
                 Checked = _module.FocusGuardEnabled,
             };
             focusGuardCb.CheckedChanged += (s, e) => _module.FocusGuardEnabled = e.Checked;
-            y += focusGuardCb.Height + 16;
+            y += focusGuardCb.Height + 10;
 
             // ---- Delay Slider ----
             var delayLabel = new Label
@@ -161,7 +161,7 @@ namespace DavidRice.BlishHud.MidiControl.UI
                 AutoSizeHeight = true,
                 AutoSizeWidth = true,
             };
-            y += delayLabel.Height + 6;
+            y += delayLabel.Height + 4;
 
             var delaySlider = new TrackBar
             {
@@ -170,16 +170,16 @@ namespace DavidRice.BlishHud.MidiControl.UI
                 MinValue = 0,
                 MaxValue = 500,
                 Value = _module.MultipleOctaveShiftDelay,
-                Width = 300,
+                Width = 310,
             };
             delaySlider.ValueChanged += (s, e) =>
             {
                 _module.MultipleOctaveShiftDelay = (int)delaySlider.Value;
                 delayLabel.Text = $"Multi-Octave Shift Delay: {_module.MultipleOctaveShiftDelay} ms";
             };
-            y += (int)delaySlider.Height + 20;
+            y += (int)delaySlider.Height + 10;
 
-            // ---- Send Log ----
+            // ---- Send Log (scrollable) ----
             var logHeader = new Label
             {
                 Parent = buildPanel,
@@ -189,18 +189,33 @@ namespace DavidRice.BlishHud.MidiControl.UI
                 AutoSizeHeight = true,
                 AutoSizeWidth = true,
             };
-            y += logHeader.Height + 6;
+            y += logHeader.Height + 4;
+
+            var logPanel = new Panel
+            {
+                Parent = buildPanel,
+                Location = new Point(x, y),
+                Size = new Point(420, 90),
+                CanScroll = true,
+            };
 
             _logLabel = new Label
             {
-                Parent = buildPanel,
+                Parent = logPanel,
                 Text = _module.LastSendLog,
-                Location = new Point(x, y),
+                Location = new Point(0, 0),
                 AutoSizeHeight = true,
                 Width = 400,
                 WrapText = true,
                 TextColor = Color.LightGray,
             };
+
+            _onLogUpdate = () =>
+            {
+                if (_logLabel != null)
+                    _logLabel.Text = _module.LastSendLog;
+            };
+            _module.RecentSendLogUpdated += _onLogUpdate;
 
             RefreshDevices();
             PopulateKeymapDropdown();
@@ -302,6 +317,12 @@ namespace DavidRice.BlishHud.MidiControl.UI
                 _module.SelectKeymap(keymap.Id);
                 RefreshPreview();
             }
+        }
+
+        public void Unload()
+        {
+            if (_onLogUpdate != null)
+                _module.RecentSendLogUpdated -= _onLogUpdate;
         }
 
         private void RefreshPreview()

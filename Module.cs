@@ -50,6 +50,7 @@ namespace DavidRice.BlishHud.MidiControl
 
         // ---- Diagnostics ----
         private readonly Queue<string> _recentSendLog = new Queue<string>(10);
+        public event Action? RecentSendLogUpdated;
 
         // ---- UI ----
         private CornerIcon? _cornerIcon;
@@ -308,9 +309,15 @@ namespace DavidRice.BlishHud.MidiControl
 
         private void OnNoteProcessed(Core.MidiNoteEvent noteEvent, Core.KeySendResult result)
         {
+            if (result.SentKeyNames.Length == 0)
+                return;
+
             string noteName = Core.MidiNote.GetNoteName(noteEvent.NoteNumber);
-            int actionCount = result.Actions.Length;
-            string desc = $"{noteName}: {actionCount} action(s), octave={result.NewOctave}";
+            string keys = string.Join(" + ", result.SentKeyNames);
+            string octavePrefix = result.PreviousOctave == result.NewOctave
+                ? $"oct {result.NewOctave}"
+                : $"oct {result.PreviousOctave}→{result.NewOctave}";
+            string desc = $"{octavePrefix}: {noteName} → {keys}";
 
             if (_recentSendLog.Count > 0 && _recentSendLog.Peek() == "No sends yet.")
                 _recentSendLog.Dequeue();
@@ -318,6 +325,8 @@ namespace DavidRice.BlishHud.MidiControl
             _recentSendLog.Enqueue(desc);
             while (_recentSendLog.Count > 10)
                 _recentSendLog.Dequeue();
+
+            RecentSendLogUpdated?.Invoke();
         }
 
         private Keymap? GetActiveKeymap()
@@ -441,6 +450,7 @@ namespace DavidRice.BlishHud.MidiControl
             private static readonly Logger Logger = Logger.GetLogger<MidiSettingsTabView>();
 
             private readonly MidiModule _module;
+            private MidiSettingsView? _view;
 
             public MidiSettingsTabView(MidiModule module)
             {
@@ -475,7 +485,8 @@ namespace DavidRice.BlishHud.MidiControl
 
                 try
                 {
-                    new MidiSettingsView(_module).Build(panel);
+                    _view = new MidiSettingsView(_module);
+                    _view.Build(panel);
                 }
                 catch (Exception ex)
                 {
@@ -488,6 +499,7 @@ namespace DavidRice.BlishHud.MidiControl
             public void DoUnload()
             {
                 Logger.Info("DoUnload called.");
+                _view?.Unload();
             }
         }
     }
