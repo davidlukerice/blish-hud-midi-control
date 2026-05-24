@@ -26,9 +26,9 @@ namespace DavidRice.BlishHud.MidiControl.Core
         private readonly Action<uint> _sendTap;
         private bool _disposed;
 
-        public KeySendThread(Action<uint>? sendTap = null)
+        public KeySendThread(Action<uint> sendTap)
         {
-            _sendTap = sendTap ?? SendInputApi.SendKeyTap;
+            _sendTap = sendTap;
             _queue = new BlockingCollection<SendAction>();
             _thread = new Thread(Run)
             {

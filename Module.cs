@@ -121,7 +121,7 @@ namespace DavidRice.BlishHud.MidiControl
 
         protected override async Task LoadAsync()
         {
-            _keySendThread = new Core.KeySendThread();
+            _keySendThread = new Core.KeySendThread(SendInputApi.SendKeyTap);
             _keySendThread.Start();
 
             _keySender = new Core.KeySender(_keySendThread);

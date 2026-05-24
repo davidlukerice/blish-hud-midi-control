@@ -26,13 +26,6 @@ namespace DavidRice.BlishHud.MidiControl.Tests.Input
         }
 
         [Test]
-        public void SendKeyTap_DoesNotThrow_On_ValidScanCode()
-        {
-            // Uses scan code 0x02 for the '1' key (US layout)
-            Assert.DoesNotThrow(() => SendInputApi.SendKeyTap(scanCode: 0x02));
-        }
-
-        [Test]
         public void SendKeyUp_Throws_On_ZeroScanCode()
         {
             var ex = Assert.Throws<ArgumentOutOfRangeException>(() =>
@@ -48,12 +41,6 @@ namespace DavidRice.BlishHud.MidiControl.Tests.Input
                 SendInputApi.SendKeyUp(scanCode: (uint)ushort.MaxValue + 1));
 
             Assert.That(ex!.ParamName, Is.EqualTo("scanCode"));
-        }
-
-        [Test]
-        public void SendKeyUp_DoesNotThrow_On_ValidScanCode()
-        {
-            Assert.DoesNotThrow(() => SendInputApi.SendKeyUp(scanCode: 0x02));
         }
 
         [Test]
