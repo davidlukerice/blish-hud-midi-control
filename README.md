@@ -16,12 +16,19 @@ flowchart LR
     subgraph Input["MIDI Input"]
         Device["MIDI Hardware"]
         MidiIn["NAudio MidiIn\n(background thread)"]
+        Eval["ConnectionEvaluator\n(auto-reconnect every 10s)"]
+    end
+
+    subgraph Config["Configuration"]
+        KR["KeymapRegistry\n(built-in + custom JSON)"]
     end
 
     subgraph Processing["Blish HUD Game Thread"]
         Queue["Thread-safe Queue"]
         Mod["Module.Update()\n(once/tick)"]
-        KS["KeySender"]
+        Gates["Guard Gates\n(send toggle, focus guard)"]
+        KS["KeySender\n(keymap + octave logic)"]
+        Diag["Recent Sends Log\n(diagnostics UI)"]
     end
 
     subgraph Output["Key Output"]
@@ -31,19 +38,25 @@ flowchart LR
         GW2["Guild Wars 2"]
     end
 
-    Device -->|MIDI messages| MidiIn
+    Device -->|NoteOn / NoteOff| MidiIn
     MidiIn -->|enqueue| Queue
+    Eval -.->|close / reopen| MidiIn
+    KR -->|active keymap| Mod
     Queue -->|dequeue| Mod
-    Mod --> KS
-    KS -->|"SendAction[]"| KSQueue
+    Mod --> Gates
+    Gates -->|allowed| KS
+    KS -->|"SendAction[]\n(scan codes)"| KSQueue
+    KS -.->|NoteProcessed| Diag
     KSQueue -->|consume| KST
     KST -->|scan codes| SI
     SI --> GW2
 ```
 
-1. **MIDI Input** — NAudio opens the selected device and collects `NoteOn`/`NoteOff` messages on a background thread. Events are placed into a `ConcurrentQueue`.
-2. **Blish HUD Game Thread** — Once per `Update()` tick, the module drains the queue into `KeySender`, which runs the active keymap's octave-shift logic (auto-swap, alt-octave, multi-shift delay) and produces `SendAction`s.
-3. **Key Output** — `KeySendThread` dequeues each `SendAction` and calls `SendInput` with scan codes. KeyTap sends down+up back-to-back; multi-octave shifts insert a configurable sleep between shift presses.
+1. **MIDI Input** — NAudio opens the selected device and collects `NoteOn`/`NoteOff` messages on a background thread. Events are placed into a `ConcurrentQueue`. `ConnectionEvaluator` checks device health every 10 s and auto-reconnects if the device disappears or reappears.
+2. **Guard Gates** — `Module.Update()` drops queued notes when sending is disabled via the toggle keybind or when the focus guard is active and GW2 is not running.
+3. **Key Resolution** — Allowed events are passed to `KeySender` along with the active `Keymap` (resolved from `KeymapRegistry`). `KeySender` runs octave-shift logic (auto-swap, alt-octave, multi-shift delay), translates key names to scan codes via `KeyToScanCode`, and produces `SendAction`s. `NoteOff` events are currently received but produce no output.
+4. **Diagnostics** — `KeySender` fires a `NoteProcessed` event after each resolved note, driving the live Recent Sends log in the settings UI.
+5. **Key Output** — `KeySendThread` dequeues each `SendAction` and calls `SendInput` with scan codes. KeyTap sends down+up back-to-back; multi-octave shifts insert a configurable sleep between shift presses.
 
 ## Features
 
