@@ -86,6 +86,7 @@
     <Compile Include="src\Keymaps\BuiltIn\HarpAutoKeymap.cs" />
     <Compile Include="src\Keymaps\BuiltIn\HornCAutoKeymap.cs" />
     <Compile Include="src\Keymaps\BuiltIn\HornEAutoKeymap.cs" />
+    <Compile Include="src\Keymaps\BuiltIn\VerdarachAutoKeymap.cs" />
     <Compile Include="src\Keymaps\BuiltIn\MinstrelKeymap.cs" />
     <Compile Include="src\Core\KeySendThread.cs" />
     <Compile Include="src\Core\MidiInputManager.cs" />

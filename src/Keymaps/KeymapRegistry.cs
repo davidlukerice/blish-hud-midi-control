@@ -22,6 +22,7 @@ namespace DavidRice.BlishHud.MidiControl.Keymaps
             Register(HarpAutoKeymap.Instance);
             Register(HornCAutoKeymap.Instance);
             Register(HornEAutoKeymap.Instance);
+            Register(VerdarachAutoKeymap.Instance);
         }
 
         public IReadOnlyList<Keymap> AllKeymaps => _keymaps.AsReadOnly();

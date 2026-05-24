@@ -25,7 +25,8 @@ All v1 PRD user stories are implemented. The module has gained additional built-
 | 1 | ✅ **Complete** | **Lute Auto**, **Harp Auto**, **Horn (C) Auto**, **Horn (E) Auto** | Lute/Harp/Horn(C) are 3-octave C Major natural (9/0 shifts). Horn(E) is 2-octave E Major (both shifts on 9), discovered during manual testing that the in-game Horn plays in E. |
 | 2 | — | **Verdarach Auto** | 3-octave C Major natural. Same structure as chunk 1, but separate for legendary novelty skin gating. |
 | 3 | — | **Bass Guitar Auto** | 2-octave C Major natural (starting octave TBD). |
-| 4 | — | **Drum Kit** | Research typical MIDI finger-drumming layouts; map to Frame Drum's 5 percussion sounds. |
+| 4 | — | **Frame Drum Auto** | 1-5 percussion sounds |
+| 5 | — | **Drum Kit** | Research typical MIDI finger-drumming layouts; map to Frame Drum's 5 percussion sounds. |
 
 ### Deferred / Future
 - Custom JSON keymap loading from data directory

@@ -99,6 +99,9 @@
     <Compile Include="Keymaps\BuiltIn\HornEAutoKeymapTests.cs">
       <Link>Keymaps\BuiltIn\HornEAutoKeymapTests.cs</Link>
     </Compile>
+    <Compile Include="Keymaps\BuiltIn\VerdarachAutoKeymapTests.cs">
+      <Link>Keymaps\BuiltIn\VerdarachAutoKeymapTests.cs</Link>
+    </Compile>
     <Compile Include="Keymaps\BuiltIn\MinstrelKeymapTests.cs">
       <Link>Keymaps\BuiltIn\MinstrelKeymapTests.cs</Link>
     </Compile>

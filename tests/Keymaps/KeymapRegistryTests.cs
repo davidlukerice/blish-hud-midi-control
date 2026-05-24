@@ -11,7 +11,7 @@ namespace DavidRice.BlishHud.MidiControl.Tests.Keymaps
         {
             var registry = new KeymapRegistry();
 
-            Assert.That(registry.AllKeymaps.Count, Is.EqualTo(10));
+            Assert.That(registry.AllKeymaps.Count, Is.EqualTo(11));
         }
 
         [Test]
@@ -95,6 +95,16 @@ namespace DavidRice.BlishHud.MidiControl.Tests.Keymaps
         }
 
         [Test]
+        public void ConstructorRegistersVerdarachAuto()
+        {
+            var registry = new KeymapRegistry();
+
+            var found = registry.FindById("verdarach-auto");
+            Assert.That(found, Is.Not.Null);
+            Assert.That(found!.Name, Is.EqualTo("Verdarach (Auto)"));
+        }
+
+        [Test]
         public void ConstructorRegistersHornEAuto()
         {
             var registry = new KeymapRegistry();
@@ -164,7 +174,7 @@ namespace DavidRice.BlishHud.MidiControl.Tests.Keymaps
 
             registry.Register(custom);
 
-            Assert.That(registry.AllKeymaps.Count, Is.EqualTo(11));
+            Assert.That(registry.AllKeymaps.Count, Is.EqualTo(12));
             Assert.That(registry.FindById("custom-1"), Is.SameAs(custom));
         }
     }
