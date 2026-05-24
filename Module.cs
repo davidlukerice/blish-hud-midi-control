@@ -222,16 +222,10 @@ namespace DavidRice.BlishHud.MidiControl
         {
             try
             {
-                using (var ctx = GameService.Graphics.LendGraphicsDeviceContext())
-                {
-                    var gd = ctx.GraphicsDevice;
-                    _activeIconTexture = CreateSolidTexture(gd, Color.Green, 16);
-                    _mutedIconTexture = CreateSolidTexture(gd, Color.Gray, 16);
-                    _disconnectedIconTexture = CreateSolidTexture(gd, Color.Orange, 16);
-
-                    var tabIconTex = CreateSolidTexture(gd, Color.FromNonPremultiplied(194, 181, 145, 255), 32);
-                    _settingsTabIcon = new Blish_HUD.Content.AsyncTexture2D(tabIconTex);
-                }
+                _activeIconTexture = ContentsManager.GetTexture("icon.png");
+                _mutedIconTexture = ContentsManager.GetTexture("icon_off.png");
+                _disconnectedIconTexture = ContentsManager.GetTexture("icon_disconnected.png");
+                _settingsTabIcon = new Blish_HUD.Content.AsyncTexture2D(ContentsManager.GetTexture("icon.png"));
 
                 _cornerIcon = new CornerIcon
                 {
@@ -418,16 +412,6 @@ namespace DavidRice.BlishHud.MidiControl
         }
 
         // ---- Helpers ----
-
-        private static Texture2D CreateSolidTexture(GraphicsDevice device, Color color, int size)
-        {
-            var texture = new Texture2D(device, size, size);
-            var data = new Color[size * size];
-            for (int i = 0; i < data.Length; i++)
-                data[i] = color;
-            texture.SetData(data);
-            return texture;
-        }
 
         private static void SafetyReleaseAllKeys()
         {
