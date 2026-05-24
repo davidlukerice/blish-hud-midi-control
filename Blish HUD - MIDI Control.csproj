@@ -82,6 +82,10 @@
     <Compile Include="src\Keymaps\BuiltIn\ChoirBellAutoKeymap.cs" />
     <Compile Include="src\Keymaps\BuiltIn\FluteCAutoKeymap.cs" />
     <Compile Include="src\Keymaps\BuiltIn\FluteEAutoKeymap.cs" />
+    <Compile Include="src\Keymaps\BuiltIn\LuteAutoKeymap.cs" />
+    <Compile Include="src\Keymaps\BuiltIn\HarpAutoKeymap.cs" />
+    <Compile Include="src\Keymaps\BuiltIn\HornCAutoKeymap.cs" />
+    <Compile Include="src\Keymaps\BuiltIn\HornEAutoKeymap.cs" />
     <Compile Include="src\Keymaps\BuiltIn\MinstrelKeymap.cs" />
     <Compile Include="src\Core\KeySendThread.cs" />
     <Compile Include="src\Core\MidiInputManager.cs" />

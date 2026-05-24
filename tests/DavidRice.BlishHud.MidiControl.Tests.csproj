@@ -87,6 +87,18 @@
     <Compile Include="Keymaps\BuiltIn\FluteEAutoKeymapTests.cs">
       <Link>Keymaps\BuiltIn\FluteEAutoKeymapTests.cs</Link>
     </Compile>
+    <Compile Include="Keymaps\BuiltIn\LuteAutoKeymapTests.cs">
+      <Link>Keymaps\BuiltIn\LuteAutoKeymapTests.cs</Link>
+    </Compile>
+    <Compile Include="Keymaps\BuiltIn\HarpAutoKeymapTests.cs">
+      <Link>Keymaps\BuiltIn\HarpAutoKeymapTests.cs</Link>
+    </Compile>
+    <Compile Include="Keymaps\BuiltIn\HornCAutoKeymapTests.cs">
+      <Link>Keymaps\BuiltIn\HornCAutoKeymapTests.cs</Link>
+    </Compile>
+    <Compile Include="Keymaps\BuiltIn\HornEAutoKeymapTests.cs">
+      <Link>Keymaps\BuiltIn\HornEAutoKeymapTests.cs</Link>
+    </Compile>
     <Compile Include="Keymaps\BuiltIn\MinstrelKeymapTests.cs">
       <Link>Keymaps\BuiltIn\MinstrelKeymapTests.cs</Link>
     </Compile>

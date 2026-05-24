@@ -18,6 +18,10 @@ namespace DavidRice.BlishHud.MidiControl.Keymaps
             Register(ChoirBellAutoKeymap.Instance);
             Register(FluteCAutoKeymap.Instance);
             Register(FluteEAutoKeymap.Instance);
+            Register(LuteAutoKeymap.Instance);
+            Register(HarpAutoKeymap.Instance);
+            Register(HornCAutoKeymap.Instance);
+            Register(HornEAutoKeymap.Instance);
         }
 
         public IReadOnlyList<Keymap> AllKeymaps => _keymaps.AsReadOnly();

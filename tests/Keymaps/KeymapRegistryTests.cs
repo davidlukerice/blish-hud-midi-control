@@ -11,7 +11,7 @@ namespace DavidRice.BlishHud.MidiControl.Tests.Keymaps
         {
             var registry = new KeymapRegistry();
 
-            Assert.That(registry.AllKeymaps.Count, Is.EqualTo(6));
+            Assert.That(registry.AllKeymaps.Count, Is.EqualTo(10));
         }
 
         [Test]
@@ -62,6 +62,46 @@ namespace DavidRice.BlishHud.MidiControl.Tests.Keymaps
             var found = registry.FindById("flute-e-auto");
             Assert.That(found, Is.Not.Null);
             Assert.That(found!.Name, Is.EqualTo("Flute (E) (Auto)"));
+        }
+
+        [Test]
+        public void ConstructorRegistersLuteAuto()
+        {
+            var registry = new KeymapRegistry();
+
+            var found = registry.FindById("lute-auto");
+            Assert.That(found, Is.Not.Null);
+            Assert.That(found!.Name, Is.EqualTo("Lute (Auto)"));
+        }
+
+        [Test]
+        public void ConstructorRegistersHarpAuto()
+        {
+            var registry = new KeymapRegistry();
+
+            var found = registry.FindById("harp-auto");
+            Assert.That(found, Is.Not.Null);
+            Assert.That(found!.Name, Is.EqualTo("Harp (Auto)"));
+        }
+
+        [Test]
+        public void ConstructorRegistersHornCAuto()
+        {
+            var registry = new KeymapRegistry();
+
+            var found = registry.FindById("horn-c-auto");
+            Assert.That(found, Is.Not.Null);
+            Assert.That(found!.Name, Is.EqualTo("Horn (C) (Auto)"));
+        }
+
+        [Test]
+        public void ConstructorRegistersHornEAuto()
+        {
+            var registry = new KeymapRegistry();
+
+            var found = registry.FindById("horn-e-auto");
+            Assert.That(found, Is.Not.Null);
+            Assert.That(found!.Name, Is.EqualTo("Horn (E) (Auto)"));
         }
 
         [Test]
@@ -124,7 +164,7 @@ namespace DavidRice.BlishHud.MidiControl.Tests.Keymaps
 
             registry.Register(custom);
 
-            Assert.That(registry.AllKeymaps.Count, Is.EqualTo(7));
+            Assert.That(registry.AllKeymaps.Count, Is.EqualTo(11));
             Assert.That(registry.FindById("custom-1"), Is.SameAs(custom));
         }
     }
