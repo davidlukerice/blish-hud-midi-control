@@ -1,6 +1,6 @@
 # PRD: Blish HUD MIDI Control v1
 
-**Status:** ready-for-agent
+**Status:** implemented (v0.0.3 released 2026-05-24)
 
 ---
 
@@ -131,7 +131,7 @@ The project is new; no existing tests. Pattern after standard NUnit/xUnit unit t
 - Configuration validation UI for malformed custom keymaps
 - Non-Guild-Wars-2 games or platforms
 
-> **Post-v1 note:** Two items from "Out of Scope" have since been implemented in v0.0.2+:
+> **Post-v1 note:** Items from "Out of Scope" implemented in v0.0.2–v0.0.3:
 > - Additional built-in keymaps (Grand Piano, Flute C, Flute E, Choir Bell, Minstrel non-auto)
 > - In-settings last-note indicator ("Recent Sends" scrollable log panel)
 
