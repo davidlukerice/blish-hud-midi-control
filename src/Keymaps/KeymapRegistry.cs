@@ -12,6 +12,7 @@ namespace DavidRice.BlishHud.MidiControl.Keymaps
 
         public KeymapRegistry()
         {
+            Register(GeneralKeymap.Instance);
             Register(GrandPianoAutoKeymap.Instance);
             Register(MinstrelAutoKeymap.Instance);
             Register(MinstrelKeymap.Instance);

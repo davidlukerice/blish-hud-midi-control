@@ -78,6 +78,7 @@
     <Compile Include="src\Keymaps\KeymapRegistry.cs" />
     <Compile Include="src\Keymaps\KeymapPreviewFormatter.cs" />
     <Compile Include="src\Keymaps\BuiltIn\MinstrelAutoKeymap.cs" />
+    <Compile Include="src\Keymaps\BuiltIn\GeneralKeymap.cs" />
     <Compile Include="src\Keymaps\BuiltIn\GrandPianoAutoKeymap.cs" />
     <Compile Include="src\Keymaps\BuiltIn\ChoirBellAutoKeymap.cs" />
     <Compile Include="src\Keymaps\BuiltIn\FluteCAutoKeymap.cs" />

@@ -11,7 +11,17 @@ namespace DavidRice.BlishHud.MidiControl.Tests.Keymaps
         {
             var registry = new KeymapRegistry();
 
-            Assert.That(registry.AllKeymaps.Count, Is.EqualTo(12));
+            Assert.That(registry.AllKeymaps.Count, Is.EqualTo(13));
+        }
+
+        [Test]
+        public void ConstructorRegistersGeneral()
+        {
+            var registry = new KeymapRegistry();
+
+            var found = registry.FindById("general");
+            Assert.That(found, Is.Not.Null);
+            Assert.That(found!.Name, Is.EqualTo("General (Manual)"));
         }
 
         [Test]
@@ -184,7 +194,7 @@ namespace DavidRice.BlishHud.MidiControl.Tests.Keymaps
 
             registry.Register(custom);
 
-            Assert.That(registry.AllKeymaps.Count, Is.EqualTo(13));
+            Assert.That(registry.AllKeymaps.Count, Is.EqualTo(14));
             Assert.That(registry.FindById("custom-1"), Is.SameAs(custom));
         }
     }

@@ -21,7 +21,7 @@ namespace DavidRice.BlishHud.MidiControl.Keymaps
                 throw new ArgumentNullException(nameof(keymap));
 
             var lines = keymap.Notes
-                .Select(kvp => FormatLine(kvp.Key, kvp.Value))
+                .Select(kvp => FormatLine(kvp.Key, kvp.Value, keymap))
                 .Where(line => line != null)
                 .Cast<string>()
                 .ToList();
@@ -30,7 +30,7 @@ namespace DavidRice.BlishHud.MidiControl.Keymaps
             return lines;
         }
 
-        private static string? FormatLine(string noteName, NoteDefinition definition)
+        private static string? FormatLine(string noteName, NoteDefinition definition, Keymap keymap)
         {
             if (definition.ForceInternalOctave.HasValue)
                 return $"{noteName} → internal octave: {definition.ForceInternalOctave.Value}";
@@ -39,7 +39,14 @@ namespace DavidRice.BlishHud.MidiControl.Keymaps
                 return null; // Unmapped — skip.
 
             if (!definition.Octave.HasValue)
-                return $"{noteName} → {definition.Key} (oct shift)";
+            {
+                if (definition.Key.Equals(keymap.OctaveDownKey, StringComparison.OrdinalIgnoreCase) ||
+                    definition.Key.Equals(keymap.OctaveUpKey, StringComparison.OrdinalIgnoreCase))
+                {
+                    return $"{noteName} → {definition.Key} (oct shift)";
+                }
+                return $"{noteName} → {definition.Key}";
+            }
 
             string line = $"{noteName} → {definition.Key} (oct {definition.Octave.Value})";
 

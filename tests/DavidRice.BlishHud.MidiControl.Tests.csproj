@@ -75,6 +75,9 @@
     <Compile Include="Keymaps\BuiltIn\MinstrelAutoKeymapTests.cs">
       <Link>Keymaps\BuiltIn\MinstrelAutoKeymapTests.cs</Link>
     </Compile>
+    <Compile Include="Keymaps\BuiltIn\GeneralKeymapTests.cs">
+      <Link>Keymaps\BuiltIn\GeneralKeymapTests.cs</Link>
+    </Compile>
     <Compile Include="Keymaps\BuiltIn\GrandPianoAutoKeymapTests.cs">
       <Link>Keymaps\BuiltIn\GrandPianoAutoKeymapTests.cs</Link>
     </Compile>

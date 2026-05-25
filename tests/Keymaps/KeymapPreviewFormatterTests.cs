@@ -38,10 +38,26 @@ namespace tests.Keymaps
         }
 
         [Test]
+        public void FormatLines_NoOctaveNote_WithoutShiftKey_ShowsPlainKey()
+        {
+            var keymap = new Keymap("test", "Test")
+            {
+                OctaveDownKey = "9",
+                OctaveUpKey = "0",
+                Notes = { { "C4", new NoteDefinition(key: "1") } }
+            };
+
+            var lines = KeymapPreviewFormatter.FormatLines(keymap);
+
+            Assert.That(lines[0], Is.EqualTo("C4 → 1"));
+        }
+
+        [Test]
         public void FormatLines_OctaveShiftKey_FormatsOctShift()
         {
             var keymap = new Keymap("test", "Test")
             {
+                OctaveDownKey = "9",
                 Notes = { { "C#4", new NoteDefinition(key: "9") } }
             };
 
@@ -81,6 +97,8 @@ namespace tests.Keymaps
         {
             var keymap = new Keymap("test", "Test")
             {
+                OctaveDownKey = "x",
+                OctaveUpKey = "z",
                 Notes =
                 {
                     { "C#4", new NoteDefinition(key: "x") },
