@@ -8,47 +8,72 @@ Additional features delivered in v0.0.3:
 - Additional built-in keymaps: Grand Piano, Flute (C), Flute (E), Choir Bell, Minstrel (non-auto)
 - Live Recent Sends log in settings panel
 
-## v0.0.4 — Additional Built-in Keymaps
+## v0.0.4 (Released)
 
-### Chunk 1 — Lute / Harp / Horn Auto
+Additional built-in keymaps:
+- **Lute Auto**, **Harp Auto**, **Horn (C) Auto**, **Horn (E) Auto**
+- **Verdarach Auto**
+- **Bass Guitar Auto**
+- **General (Manual)** — manual-octave keymap, no auto-swap, D5/E5 as octave switches
 
-Three 3-octave C Major natural instruments with identical structure:
-- **Musical Lute (Auto)** — `lute-auto`
-- **Musical Harp (Auto)** — `harp-auto`
-- **Marriner's Horn (Auto)** — `horn-auto`
+Preview formatter fix: `(oct shift)` label only shown when key matches the keymap's `OctaveDownKey`/`OctaveUpKey`.
 
-Each maps C3–B3 (octave 0, keys 1–7), C4–B4 + C5 alt (octave 1), D5–C6 (octave 2).
-Octave shifts on `9`/`0`. No sharp notes, no force-internal-octave bindings.
+## v0.0.5 — Custom JSON Keymaps
 
-### Chunk 2 — Verdarach Auto
+### Goals
 
-- **Musical Verdarach (Auto)** — `verdarach-auto`
+Allow users to create custom keymaps by dropping `.json` files into the module's data directory (a Blish HUD-managed folder, typically under `%USERPROFILE%\Documents\Guild Wars 2\addons\blishhud\`). Custom keymaps appear in the keymap settings dropdown alongside built-ins.
 
-3-octave C Major natural, same structure as chunk 1. Separate chunk because it requires
-the legendary Verdarach skin unlock.
+### Chunk 1 — JSON Schema and Model
 
-### Chunk 3 — Bass Guitar Auto
+Define the JSON contract. Keystone fields:
 
-- **Musical Bass Guitar (Auto)** — `bass-guitar-auto`
+```json
+{
+  "id": "my-custom-keymap",
+  "name": "My Custom Keymap",
+  "autoOctaveSwap": true,
+  "octaveDownKey": "9",
+  "octaveUpKey": "0",
+  "notes": {
+    "C3": { "key": "1", "octave": 0 },
+    "C4": { "key": "1", "octave": 1, "altOctave": 0, "altOctaveKey": "8" },
+    "C#4": { "key": "9" },
+    "F#4": { "forceInternalOctave": 0 }
+  }
+}
+```
 
-2-octave instrument. Starting octave and exact note range to be verified in-game.
-Likely C Major natural with 9/0 shifts.
+Rules:
+- `id` and `name` are required.
+- `notes` keys are MIDI note names (`C3`, `D#4`, `Bb5`, etc.).
+- A note with only `key` and no `octave` is a special/manual key (e.g. octave switch).
+- `autoOctaveSwap` defaults to `true` when absent.
 
-### Chunk 4 — Drum Kit
+### Chunk 2 — File Discovery and Loading
 
-Research typical MIDI finger-drumming layouts (e.g., General MIDI drum map, Ableton Drum Rack,
-common pad controller assignments). Design a keymap that maps MIDI drum notes to the
-Musical Frame Drum's 5 sounds:
-- Drum #1 (low-pitched, larger drum)
-- Drum #2 (high-pitched, larger drum)
-- Drum #3 (low-pitched, smaller drum)
-- Drum #4 (high-pitched, smaller drum)
-- Rim Shot
+`KeymapRegistry` constructor gains an optional `string customKeymapsDirectory` parameter (provided by `MidiModule` via `DirectoriesManager`):
 
-## Follow-up Items (Not in v0.0.4)
+- Enumerate `*.json` files in the directory.
+- Deserialize each with `try/catch` (Newtonsoft.Json).
+- Valid keymaps are appended to `_keymaps`.
+- Invalid files are logged as warnings and skipped.
+- A duplicate `id` is skipped with a warning (first wins; built-ins win over custom).
 
-- [ ] Custom JSON keymap loading from data directory
+### Chunk 3 — Settings UI Refresh
+
+When the settings panel is opened or a custom JSON is added/removed, the keymap dropdown should reflect the current set. Blish HUD does not provide file-watching baked into its settings; simplest approach is to reload the registry each time the settings panel is built (or add a "Reload" button).
+
+### Chunk 4 — Validation and Error UI
+
+- Minimum: log to Blish HUD's log file; malformed files are silently skipped.
+- Stretch: surface a label in the settings panel: *"2 custom keymaps loaded, 1 file failed to parse."*
+
+## Deferred / Future
+
+- [ ] Frame Drum Auto keymap
+- [ ] Drum Kit keymap with MIDI drum note mapping
 - [ ] `noteoff` support / true key-down key-up hold behavior
 - [ ] Floating overlay indicator showing last played note (outside settings tab)
-- [ ] Chord support for instruments with multi-key bindings
-- [ ] Configuration validation and error UI for malformed custom keymaps
+- [ ] Chord support (multi-key bindings per note)
+- [ ] Better handling of 'extra' keys that activate loops, recording, or chords

@@ -1,6 +1,6 @@
 {
   "name": "MIDI Control",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "namespace": "davidrice.blishhud.midicontrol",
   "package": "Blish HUD - MIDI Control.dll",
   "manifest_version": 1,

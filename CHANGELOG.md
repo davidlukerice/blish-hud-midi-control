@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.0.4] – 2026-05-24
+
+### Added
+- **Five new auto keymaps**
+  - **Lute (Auto)** — `lute-auto`
+  - **Harp (Auto)** — `harp-auto`
+  - **Horn (C) Auto** — `horn-c-auto`
+  - **Horn (E) Auto** — `horn-e-auto`
+  - **Verdarach (Auto)** — `verdarach-auto`
+  - **Bass Guitar (Auto)** — `bass-guitar-auto`
+- **General (Manual) keymap** — `general`. A general-purpose manual keymap mapping the default C4 instrument octave without auto-octave-swap. Manual octave switches on D5 (key 9, down) and E5 (key 0, up). Useful for instruments not yet covered by a dedicated built-in keymap.
+
+### Fixed
+- **Keymap preview accuracy** — The keymap preview no longer labels every note without an octave property as `(oct shift)`. It now checks the note's key against the keymap's `OctaveDownKey` / `OctaveUpKey` before applying the label.
+
 ## [0.0.3] – 2026-05-24
 
 ### Added

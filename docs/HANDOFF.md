@@ -2,9 +2,18 @@
 
 ## Current State
 
-Latest release: **v0.0.3** (released 2026-05-24).
+Latest release: **v0.0.4** (released 2026-05-24).
 
-### Core Implementation
+### v0.0.4 Delivered
+- **General (Manual)** keymap — `general`
+  - Maps the default C4 instrument octave (1–8 + F1–F5) without auto-octave-swap.
+  - Manual octave switches on D5 (key 9, down) and E5 (key 0, up).
+- All previous built-in keymaps retained (Minstrel, Grand Piano, Flute, Choir Bell, Lute, Harp, Horn, Verdarach, Bass Guitar).
+
+### v0.0.4 Fixes
+- `KeymapPreviewFormatter` no longer shows `(oct shift)` on every note without an octave property. It now checks against the keymap's `OctaveDownKey` / `OctaveUpKey` before labeling.
+
+### Core Implementation (unchanged from v0.0.3)
 - Domain model: `NoteDefinition`, `Keymap`, `KeySendResult`
 - `KeymapRegistry` with built-in keymaps, `KeymapPreviewFormatter`
 - `SendInput` P/Invoke, `KeyToScanCode` (forward + reverse lookup), `KeySendThread`
@@ -16,18 +25,19 @@ Latest release: **v0.0.3** (released 2026-05-24).
 - Toggle keybind, corner icon states (green/gray/orange), focus guard
 - Blish HUD 1.3.0, post-build xcopy to modules folder
 
-### v0.0.4 Plan — Additional Built-in Keymaps
+### v0.0.5 Plan — Custom JSON Keymaps
 
-| Chunk | Status | Instrument(s) | Notes |
+| Chunk | Status | Feature | Notes |
 |---|---|---|---|
-| 1 | ✅ **Complete** | **Lute Auto**, **Harp Auto**, **Horn (C) Auto**, **Horn (E) Auto** | Lute/Harp/Horn(C) are 3-octave C Major natural (9/0 shifts). Horn(E) is 2-octave E Major (both shifts on 9), discovered during manual testing that the in-game Horn plays in E. |
-| 2 | ✅ **Complete** | **Verdarach Auto** | 3-octave C Major natural. Same structure as chunk 1, but separate for legendary novelty skin gating. |
-| 3 | ✅ **Complete** | **Bass Guitar Auto** | 2-octave C Major natural starting on C3 (15 notes: C3–C5). Octave 2 is unmapped; a comment documents the action keys (loops 1–8, return-to-octave-1 on 9, tempo lock on 0). |
-| 4 | — | **Frame Drum Auto** | 1-5 percussion sounds |
-| 5 | — | **Drum Kit** | Research typical MIDI finger-drumming layouts; map to Frame Drum's 5 percussion sounds. |
+| 1 | — | **JSON keymap schema** | Define contract: `id`, `name`, `autoOctaveSwap`, `octaveDownKey`, `octaveUpKey`, `notes` array or dict. |
+| 2 | — | **Custom keymap loader** | `KeymapRegistry` discovers `.json` files in module data directory, deserializes via Newtonsoft.Json, appends to `AllKeymaps`. |
+| 3 | — | **Error handling** | Catch parse failures, log warnings, skip malformed files. Surface a count of load failures in UI if feasible. |
+| 4 | — | **Settings dropdown refresh** | `MidiSettingsView` or `MidiModule` should refresh keymap dropdown when custom files appear/disappear. |
+| 5 | — | **Documentation** | Add a README / wiki section explaining the JSON keymap format with examples. |
 
-### Deferred / Future
-- Custom JSON keymap loading from data directory
+### Deferred / Future (v0.0.6+)
+- **Frame Drum Auto** — 1-5 percussion sounds
+- **Drum Kit** — Research typical MIDI finger-drumming layouts; map to Frame Drum's 5 percussion sounds
 - `noteoff` support / true key-down key-up hold behavior
 - Chord support for instruments with multi-key bindings
 - Configuration validation and error UI for malformed custom keymaps

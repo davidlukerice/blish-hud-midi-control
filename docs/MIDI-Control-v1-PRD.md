@@ -123,17 +123,19 @@ The project is new; no existing tests. Pattern after standard NUnit/xUnit unit t
 
 ## Out of Scope
 
-- Additional built-in keymaps beyond The Minstrel (Auto) — will follow once the data model is validated
-- Custom user-defined keymaps via JSON in the data directory
+- Custom user-defined keymaps via JSON in the data directory **(planned for v0.0.5)**
 - `noteoff` support / true key-down hold behavior
 - Floating overlay indicator or last-note text display
 - Chord support (multi-key bindings per note)
 - Configuration validation UI for malformed custom keymaps
 - Non-Guild-Wars-2 games or platforms
 
-> **Post-v1 note:** Items from "Out of Scope" implemented in v0.0.2–v0.0.3:
-> - Additional built-in keymaps (Grand Piano, Flute C, Flute E, Choir Bell, Minstrel non-auto)
+> **Post-v1 note:** Items from "Out of Scope" implemented in v0.0.2–v0.0.4:
+> - Additional built-in keymaps (Grand Piano, Flute C, Flute E, Choir Bell, Minstrel non-auto, Lute, Harp, Horn, Verdarach, Bass Guitar, General)
 > - In-settings last-note indicator ("Recent Sends" scrollable log panel)
+> - Preview formatter fix: `(oct shift)` label accuracy
+>
+> **v0.0.5 plan:** Custom JSON keymap loading from the module's data directory. See `docs/implementation-plan.md`.
 
 ## Further Notes
 

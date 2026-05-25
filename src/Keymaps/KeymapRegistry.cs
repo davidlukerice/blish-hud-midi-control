@@ -14,17 +14,17 @@ namespace DavidRice.BlishHud.MidiControl.Keymaps
         {
             Register(GeneralKeymap.Instance);
             Register(GrandPianoAutoKeymap.Instance);
-            Register(MinstrelAutoKeymap.Instance);
-            Register(MinstrelKeymap.Instance);
-            Register(ChoirBellAutoKeymap.Instance);
+            Register(BassGuitarAutoKeymap.Instance);
             Register(FluteCAutoKeymap.Instance);
             Register(FluteEAutoKeymap.Instance);
-            Register(LuteAutoKeymap.Instance);
             Register(HarpAutoKeymap.Instance);
             Register(HornCAutoKeymap.Instance);
             Register(HornEAutoKeymap.Instance);
+            Register(LuteAutoKeymap.Instance);
+            Register(ChoirBellAutoKeymap.Instance);
+            Register(MinstrelKeymap.Instance);
+            Register(MinstrelAutoKeymap.Instance);
             Register(VerdarachAutoKeymap.Instance);
-            Register(BassGuitarAutoKeymap.Instance);
         }
 
         public IReadOnlyList<Keymap> AllKeymaps => _keymaps.AsReadOnly();
