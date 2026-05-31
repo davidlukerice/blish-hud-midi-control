@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.0.5] – In Progress
+
+### Added
+- **Corner icon right-click toggle** — Right-clicking the corner icon now toggles `Send Notes` on or off, in addition to the existing toggle keybind.
+
 ## [0.0.4] – 2026-05-24
 
 ### Added

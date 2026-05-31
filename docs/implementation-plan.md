@@ -1,23 +1,5 @@
 # Implementation Plan: Blish HUD MIDI Control
 
-## v0.0.3 (Released)
-
-All v1 PRD user stories implemented. See `docs/MIDI-Control-v1-PRD.md` for details.
-
-Additional features delivered in v0.0.3:
-- Additional built-in keymaps: Grand Piano, Flute (C), Flute (E), Choir Bell, Minstrel (non-auto)
-- Live Recent Sends log in settings panel
-
-## v0.0.4 (Released)
-
-Additional built-in keymaps:
-- **Lute Auto**, **Harp Auto**, **Horn (C) Auto**, **Horn (E) Auto**
-- **Verdarach Auto**
-- **Bass Guitar Auto**
-- **General (Manual)** — manual-octave keymap, no auto-swap, D5/E5 as octave switches
-
-Preview formatter fix: `(oct shift)` label only shown when key matches the keymap's `OctaveDownKey`/`OctaveUpKey`.
-
 ## v0.0.5 — Custom JSON Keymaps
 
 ### Goals

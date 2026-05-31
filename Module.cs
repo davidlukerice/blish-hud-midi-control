@@ -262,6 +262,11 @@ namespace DavidRice.BlishHud.MidiControl
                         Logger.Error("Corner icon click failed.", ex);
                     }
                 };
+
+                _cornerIcon.RightMouseButtonReleased += (s, e) =>
+                {
+                    _sendNotes.Value = !_sendNotes.Value;
+                };
             }
             catch (Exception ex)
             {
@@ -281,7 +286,7 @@ namespace DavidRice.BlishHud.MidiControl
             }
 
             _cornerIcon.Icon = _sendNotes.Value ? _activeIconTexture : _mutedIconTexture;
-            _cornerIcon.BasicTooltipText = $"{Name} — {(_sendNotes.Value ? "Active" : "Muted")}";
+            _cornerIcon.BasicTooltipText = $"{Name} — {(_sendNotes.Value ? "Active" : "Muted")}\nRight-click to toggle";
         }
 
         private void OnSendNotesChanged(object sender, ValueChangedEventArgs<bool> e)
