@@ -1,6 +1,6 @@
 # Implementation Plan: Blish HUD MIDI Control
 
-## v0.0.5 — Custom JSON Keymaps
+## v0.1.0 — Custom JSON Keymaps
 
 ### Goals
 
@@ -61,12 +61,12 @@ Rules:
 - `ReloadKeymaps()` method: re-scans directory, handles stale selection fallback.
 - `CustomKeymapCount` and `KeymapLoadErrors` properties exposed to view.
 
-### Chunk 4 — Documentation
+### Chunk 4 — Documentation ✅
 
-Add a README / wiki section explaining the JSON keymap format with examples. Sample keymaps exist in `sample-keymaps/`:
-- `beginners-harp.json` — valid single-octave example
-- `bad-missing-id.json` — example of missing required field
-- `bad-id-collision.json` — example of ID conflict with built-in
+- `sample-keymaps/README.md` — Full documentation with Quick Start, Field Reference, Examples, Common Errors, and JSON Schema usage guide.
+- `sample-keymaps/schema.json` — JSON Schema with field validation, defaults, enum restrictions for keys and note names, and `anyOf` requiring `key` or `forceInternalOctave`.
+- Sample keymaps updated with `"$schema": "./schema.json"` references.
+- Root README updated with markdown link to `sample-keymaps/README.md`.
 
 ## Deferred / Future
 

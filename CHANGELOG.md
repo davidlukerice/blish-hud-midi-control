@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.0.5] – In Progress
+## [0.1.0] – 2026-05-31
 
 ### Added
 - **Custom JSON keymaps** — Drop `.json` files into the `midi-keymaps` directory (managed by Blish HUD, typically under `%USERPROFILE%\Documents\Guild Wars 2\addons\blishhud\midi-keymaps\`). Custom keymaps appear in the keymap dropdown alongside built-ins.
