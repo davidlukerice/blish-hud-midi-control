@@ -65,7 +65,7 @@ flowchart LR
 - **MIDI to keyboard mapping** — Play GW2 instruments with a real MIDI keyboard or controller.
 - **Auto octave swap** — Automatically tracks the current in-game octave and shifts up/down (`9`/`0`) when a note is outside the current range. Configurable delay for multi-octave jumps.
 - **Built-in instrument keymaps** — Pre-configured mappings for GW2 instruments (starting with The Minstrel).
-- **Custom JSON keymaps** — Create your own keymaps by dropping `.json` files into the module's `midi-keymaps` directory. See `sample-keymaps/` for examples.
+- **Custom JSON keymaps** — Create your own keymaps by dropping `.json` files into the module's `midi-keymaps` directory. See [`sample-keymaps/README.md`](sample-keymaps/README.md) for the full format reference, examples, and JSON schema.
 - **Toggle keybind** — A configurable global keybind to quickly enable or disable note sending.
 - **Focus guard** — Optionally block all keypresses when Guild Wars 2 is not in focus.
 

@@ -1,4 +1,5 @@
 {
+  "$schema": "./schema.json",
   "id": "beginners-harp",
   "name": "Beginner's Harp (1 Octave)",
   "autoOctaveSwap": false,

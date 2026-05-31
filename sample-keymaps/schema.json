@@ -1,0 +1,92 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/davidlukerice/blish-hud-midi-control/main/sample-keymaps/schema.json",
+  "title": "MIDI Control Keymap",
+  "description": "A keymap that maps MIDI notes to Guild Wars 2 keyboard keys for the Blish HUD MIDI Control module.",
+  "type": "object",
+  "required": ["id", "name", "notes"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Reference to this JSON Schema for editor validation and autocomplete."
+    },
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for this keymap. Used for persistence and collision detection. Must be unique across all keymaps (built-in and custom).",
+      "pattern": "^[a-z0-9-]+$",
+      "examples": ["my-custom-keymap", "beginners-harp"]
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable name displayed in the settings dropdown.",
+      "examples": ["My Custom Keymap", "Beginner's Harp (1 Octave)"]
+    },
+    "autoOctaveSwap": {
+      "type": "boolean",
+      "description": "When true, the module automatically tracks the current in-game octave and sends octave-shift keys (9/0) when a note is outside the current range.",
+      "default": true
+    },
+    "octaveDownKey": {
+      "type": "string",
+      "description": "The keyboard key that shifts the in-game instrument down one octave. Only used when autoOctaveSwap is true.",
+      "enum": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12", "SPACE", "ENTER", "ESC", "ESCAPE", "TAB", "BACKSPACE"]
+    },
+    "octaveUpKey": {
+      "type": "string",
+      "description": "The keyboard key that shifts the in-game instrument up one octave. Only used when autoOctaveSwap is true.",
+      "enum": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12", "SPACE", "ENTER", "ESC", "ESCAPE", "TAB", "BACKSPACE"]
+    },
+    "notes": {
+      "type": "object",
+      "description": "Mapping from MIDI note names to note definitions. Each key is a MIDI note name (e.g. C4, D#4, Bb5).",
+      "minProperties": 1,
+      "patternProperties": {
+        "^[A-G]#?\\d+$": {
+          "type": "object",
+          "description": "Definition of how a single MIDI note maps to a keyboard key.",
+          "anyOf": [
+            {
+              "required": ["key"]
+            },
+            {
+              "required": ["forceInternalOctave"]
+            }
+          ],
+          "properties": {
+            "key": {
+              "type": "string",
+              "description": "The keyboard key to send when this MIDI note is received. Required unless forceInternalOctave is set.",
+              "enum": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12", "SPACE", "ENTER", "ESC", "ESCAPE", "TAB", "BACKSPACE"]
+            },
+            "octave": {
+              "type": "integer",
+              "description": "The relative octave (0-5) this note belongs to. Used by auto-octave-swap logic. Omit for special/manual keys (e.g. octave shift buttons).",
+              "minimum": 0,
+              "maximum": 5
+            },
+            "altOctave": {
+              "type": "integer",
+              "description": "An alternative relative octave where this note can be played without shifting octaves, using a different key.",
+              "minimum": 0,
+              "maximum": 5
+            },
+            "altOctaveKey": {
+              "type": "string",
+              "description": "The keyboard key to use when playing this note on the altOctave. Only meaningful when altOctave is also set.",
+              "enum": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12", "SPACE", "ENTER", "ESC", "ESCAPE", "TAB", "BACKSPACE"]
+            },
+            "forceInternalOctave": {
+              "type": "integer",
+              "description": "Updates the module's internal octave tracker without sending a keypress. Used for notes that change the active octave implicitly (e.g. black keys on The Minstrel).",
+              "minimum": 0,
+              "maximum": 5
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": true
+}
