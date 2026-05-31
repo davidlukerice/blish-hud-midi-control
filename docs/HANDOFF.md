@@ -21,7 +21,7 @@ Latest release: **v0.0.4** (released 2026-05-24).
 | Chunk | Status | Feature | Notes |
 |---|---|---|---|
 | 1 | ✅ | **JSON keymap schema** | Added public setters + parameterless ctors to `Keymap`/`NoteDefinition` for Newtonsoft.Json deserialization. Added `"directories": ["keymaps"]` to manifest. |
-| 2 | — | **Custom keymap loader** | `KeymapRegistry` discovers `.json` files in module data directory, deserializes via Newtonsoft.Json, appends to `AllKeymaps`. |
+| 2 | ✅ | **Custom keymap loader** | `KeymapRegistry.LoadCustomKeymaps()` scans `*.json` in the `keymaps` directory, validates required fields, guards `id` collisions, and appends valid custom keymaps to `AllKeymaps`. `LoadErrors` exposed for UI. |
 | 3 | — | **Error handling** | Catch parse failures, log warnings, skip malformed files. Surface a count of load failures in UI if feasible. |
 | 4 | — | **Settings dropdown refresh** | `MidiSettingsView` or `MidiModule` should refresh keymap dropdown when custom files appear/disappear. |
 | 5 | — | **Documentation** | Add a README / wiki section explaining the JSON keymap format with examples. |

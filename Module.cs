@@ -114,6 +114,10 @@ namespace DavidRice.BlishHud.MidiControl
         protected override void Initialize()
         {
             _keymapRegistry = new KeymapRegistry();
+
+            string keymapsDir = DirectoriesManager.GetFullDirectoryPath("keymaps");
+            _keymapRegistry.LoadCustomKeymaps(keymapsDir);
+
             _midiInputManager = new Core.MidiInputManager(_midiQueue);
 
             _recentSendLog.Enqueue("No sends yet.");
