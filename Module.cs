@@ -357,6 +357,10 @@ namespace DavidRice.BlishHud.MidiControl
         public IReadOnlyList<string> AvailableMidiDevices => Core.MidiInputManager.AvailableDevices;
         public IReadOnlyList<Keymap> AvailableKeymaps => _keymapRegistry.AllKeymaps;
 
+        public int CustomKeymapCount => _keymapRegistry.CustomKeymapCount;
+
+        public IReadOnlyList<string> KeymapLoadErrors => _keymapRegistry.LoadErrors;
+
         public string SelectedMidiDeviceName => _selectedMidiDeviceName.Value;
         public string SelectedKeymapId => _selectedKeymapId.Value;
 
@@ -425,6 +429,27 @@ namespace DavidRice.BlishHud.MidiControl
         public void SelectKeymap(string id)
         {
             _selectedKeymapId.Value = id;
+        }
+
+        public void ReloadKeymaps()
+        {
+            string keymapsDir = DirectoriesManager.GetFullDirectoryPath("midi-keymaps");
+            _keymapRegistry.LoadCustomKeymaps(keymapsDir);
+
+            // If the selected keymap no longer exists, fall back to minstrel-auto.
+            string currentId = _selectedKeymapId.Value;
+            if (_keymapRegistry.FindById(currentId) == null)
+            {
+                Logger.Warn($"Selected keymap '{currentId}' no longer exists. Falling back to 'minstrel-auto'.");
+                _selectedKeymapId.Value = "minstrel-auto";
+                // Reset KeySender so the internal octave tracker starts fresh.
+                if (_keySendThread != null)
+                {
+                    _keySender.NoteProcessed -= OnNoteProcessed;
+                    _keySender = new Core.KeySender(_keySendThread);
+                    _keySender.NoteProcessed += OnNoteProcessed;
+                }
+            }
         }
 
         // ---- Helpers ----

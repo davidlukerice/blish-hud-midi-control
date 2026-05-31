@@ -14,47 +14,59 @@ namespace DavidRice.BlishHud.MidiControl.Keymaps
     {
         private static readonly Logger Logger = Logger.GetLogger<KeymapRegistry>();
 
-        private readonly List<Keymap> _keymaps = new List<Keymap>();
+        private readonly List<Keymap> _builtInKeymaps = new List<Keymap>();
+        private readonly List<Keymap> _customKeymaps = new List<Keymap>();
         private readonly List<string> _loadErrors = new List<string>();
 
         public KeymapRegistry()
         {
-            Register(GeneralKeymap.Instance);
-            Register(GrandPianoAutoKeymap.Instance);
-            Register(BassGuitarAutoKeymap.Instance);
-            Register(FluteCAutoKeymap.Instance);
-            Register(FluteEAutoKeymap.Instance);
-            Register(HarpAutoKeymap.Instance);
-            Register(HornCAutoKeymap.Instance);
-            Register(HornEAutoKeymap.Instance);
-            Register(LuteAutoKeymap.Instance);
-            Register(ChoirBellAutoKeymap.Instance);
-            Register(MinstrelKeymap.Instance);
-            Register(MinstrelAutoKeymap.Instance);
-            Register(VerdarachAutoKeymap.Instance);
+            RegisterBuiltIn(GeneralKeymap.Instance);
+            RegisterBuiltIn(GrandPianoAutoKeymap.Instance);
+            RegisterBuiltIn(BassGuitarAutoKeymap.Instance);
+            RegisterBuiltIn(FluteCAutoKeymap.Instance);
+            RegisterBuiltIn(FluteEAutoKeymap.Instance);
+            RegisterBuiltIn(HarpAutoKeymap.Instance);
+            RegisterBuiltIn(HornCAutoKeymap.Instance);
+            RegisterBuiltIn(HornEAutoKeymap.Instance);
+            RegisterBuiltIn(LuteAutoKeymap.Instance);
+            RegisterBuiltIn(ChoirBellAutoKeymap.Instance);
+            RegisterBuiltIn(MinstrelKeymap.Instance);
+            RegisterBuiltIn(MinstrelAutoKeymap.Instance);
+            RegisterBuiltIn(VerdarachAutoKeymap.Instance);
         }
 
-        public IReadOnlyList<Keymap> AllKeymaps => _keymaps.AsReadOnly();
+        public IReadOnlyList<Keymap> AllKeymaps =>
+            _builtInKeymaps.Concat(_customKeymaps).ToList().AsReadOnly();
+
+        public int CustomKeymapCount => _customKeymaps.Count;
 
         public IReadOnlyList<string> LoadErrors => _loadErrors.AsReadOnly();
 
         public void Register(Keymap keymap)
         {
-            _keymaps.Add(keymap);
+            _builtInKeymaps.Add(keymap);
+        }
+
+        private void RegisterBuiltIn(Keymap keymap)
+        {
+            _builtInKeymaps.Add(keymap);
         }
 
         public Keymap? FindById(string id)
         {
-            return _keymaps.FirstOrDefault(k => k.Id == id);
+            return _builtInKeymaps.FirstOrDefault(k => k.Id == id)
+                ?? _customKeymaps.FirstOrDefault(k => k.Id == id);
         }
 
         public Keymap? FindByName(string name)
         {
-            return _keymaps.FirstOrDefault(k => k.Name == name);
+            return _builtInKeymaps.FirstOrDefault(k => k.Name == name)
+                ?? _customKeymaps.FirstOrDefault(k => k.Name == name);
         }
 
         public void LoadCustomKeymaps(string directoryPath)
         {
+            _customKeymaps.Clear();
             _loadErrors.Clear();
 
             if (!Directory.Exists(directoryPath))
@@ -116,7 +128,7 @@ namespace DavidRice.BlishHud.MidiControl.Keymaps
                         continue;
                     }
 
-                    Register(keymap);
+                    _customKeymaps.Add(keymap);
                     loadedCount++;
                 }
                 catch (JsonException ex)

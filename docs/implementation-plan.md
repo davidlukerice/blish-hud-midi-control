@@ -42,14 +42,31 @@ Rules:
 - Invalid files are logged as warnings and skipped.
 - A duplicate `id` is skipped with a warning (first wins; built-ins win over custom).
 
-### Chunk 3 — Settings UI Refresh
+### Chunk 3 — Settings UI Refresh and Error Surfacing ✅
 
-When the settings panel is opened or a custom JSON is added/removed, the keymap dropdown should reflect the current set. Blish HUD does not provide file-watching baked into its settings; simplest approach is to reload the registry each time the settings panel is built (or add a "Reload" button).
+`MidiSettingsView` changes:
+- **Auto-scan on open**: `Build()` calls `RefreshKeymaps()` which reloads custom keymaps from disk.
+- **Manual reload**: "Reload Keymaps" button next to the keymap dropdown (same pattern as MIDI device "Refresh").
+- **Status label**: Below the dropdown, shows *"X custom keymaps loaded, Y error(s)"*. Gray when clean, orange when errors. Empty (hidden) when 0 customs and 0 errors.
+- **Error tooltip**: Hover the status label to see first 10 error lines.
+- **Dynamic preview panel**: When status is empty, preview panel raises up 24px and expands to 114px tall. When status shows, preview returns to normal 90px. Everything below (toggles, slider, log) stays at fixed positions.
+- **Stale selection handling**: If the selected custom keymap disappears on reload, auto-fallback to `minstrel-auto` with a logged warning and fresh `KeySender` octave tracker.
 
-### Chunk 4 — Validation and Error UI
+`KeymapRegistry` changes:
+- Built-in and custom keymaps stored in separate internal lists (`_builtInKeymaps`, `_customKeymaps`).
+- `LoadCustomKeymaps()` clears customs before scanning — idempotent re-scanning.
+- `CustomKeymapCount` property exposed.
 
-- Minimum: log to Blish HUD's log file; malformed files are silently skipped.
-- Stretch: surface a label in the settings panel: *"2 custom keymaps loaded, 1 file failed to parse."*
+`MidiModule` changes:
+- `ReloadKeymaps()` method: re-scans directory, handles stale selection fallback.
+- `CustomKeymapCount` and `KeymapLoadErrors` properties exposed to view.
+
+### Chunk 4 — Documentation
+
+Add a README / wiki section explaining the JSON keymap format with examples. Sample keymaps exist in `sample-keymaps/`:
+- `beginners-harp.json` — valid single-octave example
+- `bad-missing-id.json` — example of missing required field
+- `bad-id-collision.json` — example of ID conflict with built-in
 
 ## Deferred / Future
 

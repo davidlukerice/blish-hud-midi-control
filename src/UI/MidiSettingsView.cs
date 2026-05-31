@@ -23,6 +23,11 @@ namespace DavidRice.BlishHud.MidiControl.UI
         private Dropdown? _keymapDropdown;
         private Label? _logLabel;
         private Label? _previewLabel;
+        private Panel? _previewPanel;
+        private int _previewPanelBaseY;
+        private int _previewPanelTallHeight;
+        private int _previewPanelShortHeight;
+        private Label? _keymapStatusLabel;
         private Action? _onLogUpdate;
 
         public MidiSettingsView(MidiModule module)
@@ -98,19 +103,44 @@ namespace DavidRice.BlishHud.MidiControl.UI
                 Width = 220,
             };
             _keymapDropdown.ValueChanged += OnKeymapSelected;
+
+            var reloadBtn = new StandardButton
+            {
+                Parent = buildPanel,
+                Text = "Reload Keymaps",
+                Location = new Point(248, y),
+                Width = 110,
+            };
+            reloadBtn.Click += (s, e) => RefreshKeymaps();
             y += _keymapDropdown.Height + 4;
 
-            var previewPanel = new Panel
+            _keymapStatusLabel = new Label
+            {
+                Parent = buildPanel,
+                Text = "",
+                Location = new Point(x, y),
+                Height = 20,
+                AutoSizeHeight = false,
+                AutoSizeWidth = true,
+                TextColor = Color.Gray,
+            };
+            RefreshKeymapStatusLabel();
+            y += 24;
+
+            _previewPanel = new Panel
             {
                 Parent = buildPanel,
                 Location = new Point(x, y),
                 Size = new Point(420, 90),
                 CanScroll = true,
             };
+            _previewPanelBaseY = y;
+            _previewPanelTallHeight = 114;   // 90 + 24 reclaimed from empty status row
+            _previewPanelShortHeight = 90;
 
             _previewLabel = new Label
             {
-                Parent = previewPanel,
+                Parent = _previewPanel,
                 Text = "",
                 Location = new Point(0, 0),
                 AutoSizeHeight = true,
@@ -118,7 +148,7 @@ namespace DavidRice.BlishHud.MidiControl.UI
                 WrapText = true,
                 TextColor = Color.LightGray,
             };
-            y += previewPanel.Height + 10;
+            y += _previewPanel.Height + 10;
 
             // ---- Standard Toggles ----
             var sendNotesCb = new Checkbox
@@ -217,7 +247,7 @@ namespace DavidRice.BlishHud.MidiControl.UI
             _module.RecentSendLogUpdated += _onLogUpdate;
 
             RefreshDevices();
-            PopulateKeymapDropdown();
+            RefreshKeymaps();
         }
 
         private void RefreshDevices()
@@ -281,6 +311,13 @@ namespace DavidRice.BlishHud.MidiControl.UI
                 _statusLabel.Text = _module.MidiDeviceStatus;
         }
 
+        private void RefreshKeymaps()
+        {
+            _module.ReloadKeymaps();
+            PopulateKeymapDropdown();
+            RefreshKeymapStatusLabel();
+        }
+
         private void PopulateKeymapDropdown()
         {
             if (_keymapDropdown == null) return;
@@ -319,6 +356,59 @@ namespace DavidRice.BlishHud.MidiControl.UI
         {
             if (_onLogUpdate != null)
                 _module.RecentSendLogUpdated -= _onLogUpdate;
+        }
+
+        private void RefreshKeymapStatusLabel()
+        {
+            if (_keymapStatusLabel == null || _previewPanel == null) return;
+
+            int customCount = _module.CustomKeymapCount;
+            var errors = _module.KeymapLoadErrors;
+            int errorCount = errors.Count;
+
+            if (customCount == 0 && errorCount == 0)
+            {
+                _keymapStatusLabel.Text = "";
+                _keymapStatusLabel.BasicTooltipText = null;
+                // Reclaim the status row space: raise and expand the preview panel.
+                _previewPanel.Location = new Point(_previewPanel.Location.X, _previewPanelBaseY - (_previewPanelTallHeight - _previewPanelShortHeight));
+                _previewPanel.Height = _previewPanelTallHeight;
+                return;
+            }
+
+            string text = customCount switch
+            {
+                1 => $"1 custom keymap loaded",
+                _ => $"{customCount} custom keymaps loaded",
+            };
+
+            if (errorCount > 0)
+            {
+                text += errorCount == 1 ? ", 1 error" : $", {errorCount} errors";
+                _keymapStatusLabel.TextColor = Color.Orange;
+            }
+            else
+            {
+                _keymapStatusLabel.TextColor = Color.Gray;
+            }
+
+            _keymapStatusLabel.Text = text;
+
+            if (errorCount > 0)
+            {
+                var tooltipLines = errors.Take(10).ToList();
+                if (errors.Count > 10)
+                    tooltipLines.Add($"(+{errors.Count - 10} more)");
+                _keymapStatusLabel.BasicTooltipText = string.Join("\n", tooltipLines);
+            }
+            else
+            {
+                _keymapStatusLabel.BasicTooltipText = null;
+            }
+
+            // Status text is showing: preview panel at normal position and size.
+            _previewPanel.Location = new Point(_previewPanel.Location.X, _previewPanelBaseY);
+            _previewPanel.Height = _previewPanelShortHeight;
         }
 
         private void RefreshPreview()

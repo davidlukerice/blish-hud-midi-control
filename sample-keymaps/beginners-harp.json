@@ -1,0 +1,17 @@
+{
+  "id": "beginners-harp",
+  "name": "Beginner's Harp (1 Octave)",
+  "autoOctaveSwap": false,
+  "octaveDownKey": "9",
+  "octaveUpKey": "0",
+  "notes": {
+    "C4": { "key": "1", "octave": 0 },
+    "D4": { "key": "2", "octave": 0 },
+    "E4": { "key": "3", "octave": 0 },
+    "F4": { "key": "4", "octave": 0 },
+    "G4": { "key": "5", "octave": 0 },
+    "A4": { "key": "6", "octave": 0 },
+    "B4": { "key": "7", "octave": 0 },
+    "C5": { "key": "8", "octave": 0 }
+  }
+}

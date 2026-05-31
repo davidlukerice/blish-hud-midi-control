@@ -1,3 +1,5 @@
+using System.IO;
+using System.Linq;
 using NUnit.Framework;
 using DavidRice.BlishHud.MidiControl.Keymaps;
 
@@ -184,6 +186,98 @@ namespace DavidRice.BlishHud.MidiControl.Tests.Keymaps
             var found = registry.FindByName("Nonexistent Keymap");
 
             Assert.That(found, Is.Null);
+        }
+
+        [Test]
+        public void AllKeymaps_BuiltInComeBeforeCustom()
+        {
+            var registry = new KeymapRegistry();
+            registry.Register(new Keymap(id: "custom-1", name: "Custom 1"));
+
+            var all = registry.AllKeymaps;
+            Assert.That(all.Last().Id, Is.EqualTo("custom-1"));
+        }
+
+        [Test]
+        public void CustomKeymapCount_InitiallyZero()
+        {
+            var registry = new KeymapRegistry();
+            Assert.That(registry.CustomKeymapCount, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void LoadCustomKeymaps_LoadsValidFile()
+        {
+            var registry = new KeymapRegistry();
+            string tempDir = System.IO.Path.Combine(System.IO.Path.GetTempPath(), System.Guid.NewGuid().ToString());
+            System.IO.Directory.CreateDirectory(tempDir);
+            try
+            {
+                string json = "{\"id\":\"test-map\",\"name\":\"Test Map\",\"notes\":{}}";
+                System.IO.File.WriteAllText(System.IO.Path.Combine(tempDir, "test.json"), json);
+
+                registry.LoadCustomKeymaps(tempDir);
+
+                Assert.That(registry.CustomKeymapCount, Is.EqualTo(1));
+                Assert.That(registry.FindById("test-map"), Is.Not.Null);
+            }
+            finally
+            {
+                System.IO.Directory.Delete(tempDir, true);
+            }
+        }
+
+        [Test]
+        public void LoadCustomKeymaps_IsIdempotent_OnRescan()
+        {
+            var registry = new KeymapRegistry();
+            string tempDir = System.IO.Path.Combine(System.IO.Path.GetTempPath(), System.Guid.NewGuid().ToString());
+            System.IO.Directory.CreateDirectory(tempDir);
+            try
+            {
+                string json = "{\"id\":\"test-map\",\"name\":\"Test Map\",\"notes\":{}}";
+                System.IO.File.WriteAllText(System.IO.Path.Combine(tempDir, "test.json"), json);
+
+                registry.LoadCustomKeymaps(tempDir);
+                registry.LoadCustomKeymaps(tempDir);
+
+                Assert.That(registry.CustomKeymapCount, Is.EqualTo(1));
+                Assert.That(registry.AllKeymaps.Count, Is.EqualTo(14)); // 13 built-in + 1 custom
+            }
+            finally
+            {
+                System.IO.Directory.Delete(tempDir, true);
+            }
+        }
+
+        [Test]
+        public void LoadCustomKeymaps_ClearsCustoms_AndErrors_OnRescan()
+        {
+            var registry = new KeymapRegistry();
+            string tempDir = System.IO.Path.Combine(System.IO.Path.GetTempPath(), System.Guid.NewGuid().ToString());
+            System.IO.Directory.CreateDirectory(tempDir);
+            try
+            {
+                // First scan: valid file
+                string valid = "{\"id\":\"test-map\",\"name\":\"Test Map\",\"notes\":{}}";
+                System.IO.File.WriteAllText(System.IO.Path.Combine(tempDir, "test.json"), valid);
+
+                registry.LoadCustomKeymaps(tempDir);
+                Assert.That(registry.CustomKeymapCount, Is.EqualTo(1));
+                Assert.That(registry.LoadErrors.Count, Is.EqualTo(0));
+
+                // Delete valid, add invalid
+                System.IO.File.Delete(System.IO.Path.Combine(tempDir, "test.json"));
+                System.IO.File.WriteAllText(System.IO.Path.Combine(tempDir, "bad.json"), "not json");
+
+                registry.LoadCustomKeymaps(tempDir);
+                Assert.That(registry.CustomKeymapCount, Is.EqualTo(0));
+                Assert.That(registry.LoadErrors.Count, Is.GreaterThan(0));
+            }
+            finally
+            {
+                System.IO.Directory.Delete(tempDir, true);
+            }
         }
 
         [Test]

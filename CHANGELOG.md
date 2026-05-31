@@ -3,6 +3,11 @@
 ## [0.0.5] – In Progress
 
 ### Added
+- **Custom JSON keymaps** — Drop `.json` files into the `midi-keymaps` directory (managed by Blish HUD, typically under `%USERPROFILE%\Documents\Guild Wars 2\addons\blishhud\midi-keymaps\`). Custom keymaps appear in the keymap dropdown alongside built-ins.
+- **Keymap reload** — "Reload Keymaps" button in settings rescans the directory on demand. Auto-scan also runs when the settings panel opens.
+- **Keymap load status** — Status label below the keymap dropdown shows *"X custom keymaps loaded, Y error(s)"*. Gray when clean, orange when errors. Hover for error details.
+- **Dynamic preview panel** — Preview panel expands to 114px when no status text is shown, reclaiming the space. Shrinks to 90px when status text appears.
+- **Stale keymap fallback** — If a selected custom keymap is deleted and the user reloads, the module automatically falls back to `minstrel-auto` with a logged warning.
 - **Corner icon right-click toggle** — Right-clicking the corner icon now toggles `Send Notes` on or off, in addition to the existing toggle keybind.
 
 ## [0.0.4] – 2026-05-24
