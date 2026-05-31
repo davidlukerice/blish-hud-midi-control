@@ -6,11 +6,15 @@ namespace DavidRice.BlishHud.MidiControl
 {
     public class NoteDefinition
     {
-        public string? Key { get; }
-        public int? Octave { get; }
-        public int? AltOctave { get; }
-        public string? AltOctaveKey { get; }
-        public int? ForceInternalOctave { get; }
+        public string? Key { get; set; }
+        public int? Octave { get; set; }
+        public int? AltOctave { get; set; }
+        public string? AltOctaveKey { get; set; }
+        public int? ForceInternalOctave { get; set; }
+
+        public NoteDefinition()
+        {
+        }
 
         public NoteDefinition(
             string? key = null,
@@ -29,12 +33,16 @@ namespace DavidRice.BlishHud.MidiControl
 
     public class Keymap
     {
-        public string Id { get; }
-        public string Name { get; }
+        public string Id { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
         public bool AutoOctaveSwap { get; set; } = true;
-        public Dictionary<string, NoteDefinition> Notes { get; } = new Dictionary<string, NoteDefinition>();
+        public Dictionary<string, NoteDefinition> Notes { get; set; } = new Dictionary<string, NoteDefinition>();
         public string? OctaveDownKey { get; set; }
         public string? OctaveUpKey { get; set; }
+
+        public Keymap()
+        {
+        }
 
         public Keymap(string id, string name)
         {

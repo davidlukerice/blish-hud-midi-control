@@ -6,6 +6,7 @@
   "manifest_version": 1,
   "description": "Converts MIDI device messages to keypresses for playing GW2 Instruments",
   "enabled_without_gw2": false,
+  "directories": ["keymaps"],
   "dependencies": {
     "bh.blishhud": ">=1.3.0"
   },

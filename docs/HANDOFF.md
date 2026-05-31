@@ -20,7 +20,7 @@ Latest release: **v0.0.4** (released 2026-05-24).
 
 | Chunk | Status | Feature | Notes |
 |---|---|---|---|
-| 1 | — | **JSON keymap schema** | Define contract: `id`, `name`, `autoOctaveSwap`, `octaveDownKey`, `octaveUpKey`, `notes` array or dict. |
+| 1 | ✅ | **JSON keymap schema** | Added public setters + parameterless ctors to `Keymap`/`NoteDefinition` for Newtonsoft.Json deserialization. Added `"directories": ["keymaps"]` to manifest. |
 | 2 | — | **Custom keymap loader** | `KeymapRegistry` discovers `.json` files in module data directory, deserializes via Newtonsoft.Json, appends to `AllKeymaps`. |
 | 3 | — | **Error handling** | Catch parse failures, log warnings, skip malformed files. Surface a count of load failures in UI if feasible. |
 | 4 | — | **Settings dropdown refresh** | `MidiSettingsView` or `MidiModule` should refresh keymap dropdown when custom files appear/disappear. |
