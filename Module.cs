@@ -296,6 +296,7 @@ namespace DavidRice.BlishHud.MidiControl
         private void OnSendNotesChanged(object sender, ValueChangedEventArgs<bool> e)
         {
             UpdateCornerIconState();
+            SendNotesEnabledChanged?.Invoke(e.NewValue);
         }
 
         private void OnToggleSendNotesKeybind(object sender, EventArgs e)
@@ -363,6 +364,8 @@ namespace DavidRice.BlishHud.MidiControl
 
         public string SelectedMidiDeviceName => _selectedMidiDeviceName.Value;
         public string SelectedKeymapId => _selectedKeymapId.Value;
+
+        public event Action<bool>? SendNotesEnabledChanged;
 
         public bool SendNotesEnabled
         {

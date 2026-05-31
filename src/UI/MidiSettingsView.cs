@@ -29,6 +29,8 @@ namespace DavidRice.BlishHud.MidiControl.UI
         private int _previewPanelShortHeight;
         private Label? _keymapStatusLabel;
         private Action? _onLogUpdate;
+        private Checkbox? _sendNotesCb;
+        private bool _updatingSendNotesFromEvent;
 
         public MidiSettingsView(MidiModule module)
         {
@@ -151,15 +153,20 @@ namespace DavidRice.BlishHud.MidiControl.UI
             y += _previewPanel.Height + 10;
 
             // ---- Standard Toggles ----
-            var sendNotesCb = new Checkbox
+            _sendNotesCb = new Checkbox
             {
                 Parent = buildPanel,
                 Text = "Send Notes",
                 Location = new Point(x, y),
                 Checked = _module.SendNotesEnabled,
             };
-            sendNotesCb.CheckedChanged += (s, e) => _module.SendNotesEnabled = e.Checked;
-            y += sendNotesCb.Height + 4;
+            _sendNotesCb.CheckedChanged += (s, e) =>
+            {
+                if (!_updatingSendNotesFromEvent)
+                    _module.SendNotesEnabled = e.Checked;
+            };
+            _module.SendNotesEnabledChanged += OnSendNotesEnabledChanged;
+            y += _sendNotesCb.Height + 4;
 
             var autoSwapCb = new Checkbox
             {
@@ -356,6 +363,15 @@ namespace DavidRice.BlishHud.MidiControl.UI
         {
             if (_onLogUpdate != null)
                 _module.RecentSendLogUpdated -= _onLogUpdate;
+            _module.SendNotesEnabledChanged -= OnSendNotesEnabledChanged;
+        }
+
+        private void OnSendNotesEnabledChanged(bool enabled)
+        {
+            if (_sendNotesCb == null) return;
+            _updatingSendNotesFromEvent = true;
+            _sendNotesCb.Checked = enabled;
+            _updatingSendNotesFromEvent = false;
         }
 
         private void RefreshKeymapStatusLabel()
