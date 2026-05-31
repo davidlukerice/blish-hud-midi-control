@@ -1,0 +1,34 @@
+{
+  "id": "gw2-gameplay-25key",
+  "name": "GW2 Gameplay (25-key)",
+  "autoOctaveSwap": false,
+  "notes": {
+    "C3":  { "key": "1" },
+    "C#3": { "key": "2" },
+    "D3":  { "key": "3" },
+    "D#3": { "key": "4" },
+    "E3":  { "key": "5" },
+    "F3":  { "key": "6" },
+    "F#3": { "key": "7" },
+    "G3":  { "key": "8" },
+    "G#3": { "key": "9" },
+    "A3":  { "key": "0" },
+    "A#3": { "key": "F1" },
+    "B3":  { "key": "F2" },
+
+    "C4":  { "key": "F3" },
+    "C#4": { "key": "F4" },
+    "D4":  { "key": "F" },
+    "D#4": { "key": "V" },
+    "E4":  { "key": "SPACE" },
+    "F4":  { "key": "B" },
+    "F#4": { "key": "R" },
+    "G4":  { "key": "T" },
+    "G#4": { "key": "C" },
+    "A4":  { "key": "I" },
+    "A#4": { "key": "M" },
+    "B4":  { "key": "ESC" },
+
+    "C5":  { "key": "ENTER" }
+  }
+}

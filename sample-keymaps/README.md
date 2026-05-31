@@ -38,7 +38,46 @@ A note must have at least one of `key` or `forceInternalOctave`.
 
 `1` `2` `3` `4` `5` `6` `7` `8` `9` `0` `A`–`Z` `F1`–`F12` `SPACE` `ENTER` `ESC` `ESCAPE` `TAB` `BACKSPACE`
 
-## Examples
+## Gameplay Keymaps
+
+These keymaps are designed for controlling Guild Wars 2 itself — skills, movement, menus — rather than musical instruments. They use **tap-only** behavior (press + immediate release), which works well for skill activation and menu keys but does not support held actions like walking (`WASD`) or channeled abilities.
+
+### 25-Key Layout (`gw2-gameplay-25key.json`)
+
+For 25-key MIDI keyboards (C3–C5).
+
+| Range | GW2 Keys |
+|-------|----------|
+| C3–B3 | Weapon skills `1`–`0`, Profession skills `F1`–`F2` |
+| C4–B4 | Profession `F3`–`F4`, Interact `F`, Dodge `V`, Jump `SPACE`, Special `B`, Swap `R`, Stow `T`, Call Target `C`, Inventory `I`, Map `M`, Menu `ESC` |
+| C5 | Accept `ENTER` |
+
+### 37-Key Layout (`gw2-gameplay-37key.json`)
+
+For the Akai MPK Mini Plus and other 37-key controllers (C3–C6). Three full octaves plus one key.
+
+| Range | GW2 Keys |
+|-------|----------|
+| C3–B3 | Weapon skills `1`–`0`, Profession `F1`–`F2` |
+| C4–B4 | Profession `F3`–`F4`, Interact `F`, Dodge `V`, Jump `SPACE`, Special `B`, Swap `R`, Stow `T`, Call `C`, Sheathe `X`, Walk `Z`, Guild `G` |
+| C5–B5 | Inventory `I`, Hero `H`, Contacts `Y`, Achievements `U`, Guild Panel `J`, LFG `K`, PvP `L`, Mail `O`, Party `P`, WvW `N`, Chat `M`, Menu `ESC` |
+| C6 | Accept `ENTER` |
+
+### 49-Key Layout (`gw2-gameplay-49key.json`)
+
+For 49-key MIDI keyboards (C2–C6). Four octaves with comfortable spacing.
+
+| Range | GW2 Keys |
+|-------|----------|
+| C2–B2 | Weapon skills `1`–`0`, Profession `F1`–`F2` |
+| C3–B3 | Profession `F3`–`F4`, Interact `F`, Dodge `V`, Jump `SPACE`, Special `B`, Swap `R`, Stow `T`, Call `C`, Sheathe `X`, Walk `Z`, Guild `G` |
+| C4–B4 | Inventory `I`, Hero `H`, Contacts `Y`, Achievements `U`, Guild Panel `J`, LFG `K`, PvP `L`, Mail `O`, Party `P`, WvW `N`, Chat `M`, Camera `Q` |
+| C5–B5 | Camera `W`/`E`/`A`/`S`/`D`, Menu `ESC`/`ENTER`/`TAB`/`BACKSPACE`, `F5`–`F7` |
+| C6 | `F8` |
+
+Both gameplay keymaps set `autoOctaveSwap: false` so there is no surprise octave shifting during combat.
+
+## Instrument Examples
 
 ### Single-Octave Manual Keymap
 
