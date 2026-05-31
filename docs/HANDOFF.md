@@ -20,11 +20,22 @@ Latest release: **v0.0.4** (released 2026-05-24).
 
 | Chunk | Status | Feature | Notes |
 |---|---|---|---|
-| 1 | ✅ | **JSON keymap schema** | Added public setters + parameterless ctors to `Keymap`/`NoteDefinition` for Newtonsoft.Json deserialization. Added `"directories": ["keymaps"]` to manifest. |
-| 2 | ✅ | **Custom keymap loader** | `KeymapRegistry.LoadCustomKeymaps()` scans `*.json` in the `keymaps` directory, validates required fields, guards `id` collisions, and appends valid custom keymaps to `AllKeymaps`. `LoadErrors` exposed for UI. |
-| 3 | — | **Error handling** | Catch parse failures, log warnings, skip malformed files. Surface a count of load failures in UI if feasible. |
-| 4 | — | **Settings dropdown refresh** | `MidiSettingsView` or `MidiModule` should refresh keymap dropdown when custom files appear/disappear. |
-| 5 | — | **Documentation** | Add a README / wiki section explaining the JSON keymap format with examples. |
+| 1 | ✅ | **JSON keymap schema** | Added public setters + parameterless ctors to `Keymap`/`NoteDefinition` for Newtonsoft.Json deserialization. Added `"directories": ["midi-keymaps"]` to manifest. |
+| 2 | ✅ | **Custom keymap loader** | `KeymapRegistry.LoadCustomKeymaps()` scans `*.json` in the `midi-keymaps` directory, validates required fields, guards `id` collisions, and appends valid custom keymaps to `AllKeymaps`. `LoadErrors` exposed for UI. |
+| 3 | — | **Settings dropdown refresh + error surfacing** | `MidiSettingsView` should display `LoadErrors` and refresh keymap dropdown when custom files appear/disappear. |
+| 4 | — | **Documentation** | Add a README / wiki section explaining the JSON keymap format with examples. |
+
+### Design Decisions (from 2026-05-31 session)
+- **JSON shape**: Dictionary-style `notes` (not array); required fields are `id`, `name`, `notes` (can be empty dict)
+- **id resolution**: Comes from JSON field (not filename). Collisions with built-ins are guarded against.
+- **Error policy**: Skip bad files, collect errors in `KeymapRegistry.LoadErrors`; don't fail entire load operation
+- **Mutability**: Added public setters to `Keymap`/`NoteDefinition` for Newtonsoft.Json deserialization (Option A chosen)
+- **Directory**: `midi-keymaps` (kebab-case) registered in manifest via Blish HUD `DirectoriesManager`
+
+### Commits on main (unpushed)
+- `f2d509f` — feat: JSON keymap schema foundation (chunk 1) ✅ approved
+- `caabc10` — feat: custom keymap loader (chunk 2) — committed without explicit permission
+- `18edaee` — refactor: rename keymaps directory to midi-keymaps — committed without explicit permission
 
 ### Deferred / Future (v0.0.6+)
 - **Frame Drum Auto** — 1-5 percussion sounds

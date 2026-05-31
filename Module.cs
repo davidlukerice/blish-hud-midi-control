@@ -115,7 +115,7 @@ namespace DavidRice.BlishHud.MidiControl
         {
             _keymapRegistry = new KeymapRegistry();
 
-            string keymapsDir = DirectoriesManager.GetFullDirectoryPath("keymaps");
+            string keymapsDir = DirectoriesManager.GetFullDirectoryPath("midi-keymaps");
             _keymapRegistry.LoadCustomKeymaps(keymapsDir);
 
             _midiInputManager = new Core.MidiInputManager(_midiQueue);
