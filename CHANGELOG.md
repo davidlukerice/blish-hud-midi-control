@@ -1,5 +1,14 @@
 # Changelog
 
+## [Unreleased] — v0.2.0
+
+### Added
+- **Frame Drum (Auto) built-in keymap** — `frame-drum-auto`. Maps MIDI notes `C4`–`E4` to the Frame Drum's five percussion sounds on keys `1`–`5`. No octave swapping (the instrument has no octaves).
+- **GW2 gameplay sample keymaps** — Three custom keymaps for non-musical GW2 gameplay: `gw2-gameplay-25key`, `gw2-gameplay-37key`, and `gw2-gameplay-49key`. See `sample-keymaps/README.md` for details.
+
+### Fixed
+- **Settings UI sync on corner icon right-click** — The settings panel now correctly reflects the `Send Notes` toggle state when it is toggled via right-click on the corner icon.
+
 ## [0.1.0] – 2026-05-31
 
 ### Added

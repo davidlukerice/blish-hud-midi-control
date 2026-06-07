@@ -13,7 +13,7 @@ namespace DavidRice.BlishHud.MidiControl.Tests.Keymaps
         {
             var registry = new KeymapRegistry();
 
-            Assert.That(registry.AllKeymaps.Count, Is.EqualTo(13));
+            Assert.That(registry.AllKeymaps.Count, Is.EqualTo(14));
         }
 
         [Test]
@@ -137,6 +137,16 @@ namespace DavidRice.BlishHud.MidiControl.Tests.Keymaps
         }
 
         [Test]
+        public void ConstructorRegistersFrameDrumAuto()
+        {
+            var registry = new KeymapRegistry();
+
+            var found = registry.FindById("frame-drum-auto");
+            Assert.That(found, Is.Not.Null);
+            Assert.That(found!.Name, Is.EqualTo("Frame Drum (Auto)"));
+        }
+
+        [Test]
         public void ConstructorRegistersMinstrelNonAuto()
         {
             var registry = new KeymapRegistry();
@@ -242,7 +252,7 @@ namespace DavidRice.BlishHud.MidiControl.Tests.Keymaps
                 registry.LoadCustomKeymaps(tempDir);
 
                 Assert.That(registry.CustomKeymapCount, Is.EqualTo(1));
-                Assert.That(registry.AllKeymaps.Count, Is.EqualTo(14)); // 13 built-in + 1 custom
+                Assert.That(registry.AllKeymaps.Count, Is.EqualTo(15)); // 14 built-in + 1 custom
             }
             finally
             {
@@ -288,7 +298,7 @@ namespace DavidRice.BlishHud.MidiControl.Tests.Keymaps
 
             registry.Register(custom);
 
-            Assert.That(registry.AllKeymaps.Count, Is.EqualTo(14));
+            Assert.That(registry.AllKeymaps.Count, Is.EqualTo(15));
             Assert.That(registry.FindById("custom-1"), Is.SameAs(custom));
         }
     }

@@ -108,6 +108,9 @@
     <Compile Include="Keymaps\BuiltIn\BassGuitarAutoKeymapTests.cs">
       <Link>Keymaps\BuiltIn\BassGuitarAutoKeymapTests.cs</Link>
     </Compile>
+    <Compile Include="Keymaps\BuiltIn\FrameDrumAutoKeymapTests.cs">
+      <Link>Keymaps\BuiltIn\FrameDrumAutoKeymapTests.cs</Link>
+    </Compile>
     <Compile Include="Keymaps\BuiltIn\MinstrelKeymapTests.cs">
       <Link>Keymaps\BuiltIn\MinstrelKeymapTests.cs</Link>
     </Compile>
