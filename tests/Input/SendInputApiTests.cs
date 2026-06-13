@@ -26,6 +26,24 @@ namespace DavidRice.BlishHud.MidiControl.Tests.Input
         }
 
         [Test]
+        public void SendKeyDown_Throws_On_ZeroScanCode()
+        {
+            var ex = Assert.Throws<ArgumentOutOfRangeException>(() =>
+                SendInputApi.SendKeyDown(scanCode: 0));
+
+            Assert.That(ex!.ParamName, Is.EqualTo("scanCode"));
+        }
+
+        [Test]
+        public void SendKeyDown_Throws_On_ScanCodeAboveUInt16Max()
+        {
+            var ex = Assert.Throws<ArgumentOutOfRangeException>(() =>
+                SendInputApi.SendKeyDown(scanCode: (uint)ushort.MaxValue + 1));
+
+            Assert.That(ex!.ParamName, Is.EqualTo("scanCode"));
+        }
+
+        [Test]
         public void SendKeyUp_Throws_On_ZeroScanCode()
         {
             var ex = Assert.Throws<ArgumentOutOfRangeException>(() =>

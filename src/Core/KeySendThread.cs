@@ -3,19 +3,27 @@
 using System;
 using System.Collections.Concurrent;
 using System.Threading;
-using DavidRice.BlishHud.MidiControl.Input;
 
 namespace DavidRice.BlishHud.MidiControl.Core
 {
+    public enum KeyEventType
+    {
+        KeyTap = 0,
+        KeyDown,
+        KeyUp
+    }
+
     public readonly struct SendAction
     {
         public uint ScanCode { get; }
         public int DelayAfterMs { get; }
+        public KeyEventType EventType { get; }
 
-        public SendAction(uint scanCode, int delayAfterMs = 0)
+        public SendAction(uint scanCode, int delayAfterMs = 0, KeyEventType eventType = KeyEventType.KeyTap)
         {
             ScanCode = scanCode;
             DelayAfterMs = delayAfterMs;
+            EventType = eventType;
         }
     }
 
@@ -23,12 +31,12 @@ namespace DavidRice.BlishHud.MidiControl.Core
     {
         private readonly BlockingCollection<SendAction> _queue;
         private readonly Thread _thread;
-        private readonly Action<uint> _sendTap;
+        private readonly Action<SendAction> _sendAction;
         private bool _disposed;
 
-        public KeySendThread(Action<uint> sendTap)
+        public KeySendThread(Action<SendAction> sendAction)
         {
-            _sendTap = sendTap;
+            _sendAction = sendAction;
             _queue = new BlockingCollection<SendAction>();
             _thread = new Thread(Run)
             {
@@ -80,7 +88,7 @@ namespace DavidRice.BlishHud.MidiControl.Core
         {
             foreach (var action in _queue.GetConsumingEnumerable())
             {
-                _sendTap(action.ScanCode);
+                _sendAction(action);
 
                 if (action.DelayAfterMs > 0)
                     Thread.Sleep(action.DelayAfterMs);

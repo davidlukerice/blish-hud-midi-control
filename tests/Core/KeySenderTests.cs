@@ -211,7 +211,7 @@ namespace DavidRice.BlishHud.MidiControl.Tests.Core
         [Test]
         public void Send_QueuesActionsIntoThread()
         {
-            using var thread = new KeySendThread(_ => { });
+            using var thread = new KeySendThread((SendAction _) => { });
             thread.Start();
 
             var sender = new KeySender(thread);
@@ -226,7 +226,7 @@ namespace DavidRice.BlishHud.MidiControl.Tests.Core
         [Test]
         public void Send_UpdatesCurrentOctave()
         {
-            using var thread = new KeySendThread(_ => { });
+            using var thread = new KeySendThread((SendAction _) => { });
             thread.Start();
 
             var sender = new KeySender(thread);
@@ -239,7 +239,7 @@ namespace DavidRice.BlishHud.MidiControl.Tests.Core
         [Test]
         public void Send_FiresNoteProcessedEvent()
         {
-            using var thread = new KeySendThread(_ => { });
+            using var thread = new KeySendThread((SendAction _) => { });
             thread.Start();
 
             var sender = new KeySender(thread);
@@ -250,14 +250,14 @@ namespace DavidRice.BlishHud.MidiControl.Tests.Core
             sender.Send(note, MinstrelAutoKeymap.Instance, autoSwap: true, shiftDelayMs: 0);
 
             Assert.That(captured, Is.Not.Null);
-            Assert.That(captured.Value.Actions, Has.Length.EqualTo(1));
+            Assert.That(captured!.Value.Actions, Has.Length.EqualTo(1));
             Assert.That(captured.Value.NewOctave, Is.EqualTo(0));
         }
 
         [Test]
         public void FreshInstance_StartsAtOctaveZero()
         {
-            using var thread = new KeySendThread(_ => { });
+            using var thread = new KeySendThread((SendAction _) => { });
             thread.Start();
 
             var sender1 = new KeySender(thread);
@@ -267,6 +267,209 @@ namespace DavidRice.BlishHud.MidiControl.Tests.Core
             // Simulating a keymap change: Module replaces the KeySender with a fresh instance.
             var sender2 = new KeySender(thread);
             Assert.That(sender2.CurrentOctave, Is.EqualTo(0), "Fresh KeySender must reset octave tracker to 0.");
+        }
+
+        // ---- Key Hold mode tests ----
+
+        [Test]
+        public void Resolve_KeyHold_NoteOn_ReturnsKeyDown()
+        {
+            var note = new MidiNoteEvent(48, isNoteOn: true); // C3
+            var result = KeySender.Resolve(note, MinstrelAutoKeymap.Instance, currentOctave: 0, autoSwap: true, shiftDelayMs: 50, enableKeyHold: true);
+
+            Assert.That(result.Actions, Has.Length.EqualTo(1));
+            Assert.That(result.Actions[0].EventType, Is.EqualTo(KeyEventType.KeyDown));
+            Assert.That(result.Actions[0].ScanCode, Is.EqualTo(0x02u)); // "1"
+        }
+
+        [Test]
+        public void Resolve_KeyHold_NoteOff_ReturnsKeyUp()
+        {
+            var note = new MidiNoteEvent(48, isNoteOn: false); // C3 off
+            var result = KeySender.Resolve(note, MinstrelAutoKeymap.Instance, currentOctave: 0, autoSwap: true, shiftDelayMs: 50, enableKeyHold: true);
+
+            Assert.That(result.Actions, Has.Length.EqualTo(1));
+            Assert.That(result.Actions[0].EventType, Is.EqualTo(KeyEventType.KeyUp));
+            Assert.That(result.Actions[0].ScanCode, Is.EqualTo(0x02u)); // "1"
+        }
+
+        [Test]
+        public void Resolve_KeyHold_OctaveShift_IsKeyTap()
+        {
+            // D4 is octave 1, current octave 0 → shift up then note
+            var note = new MidiNoteEvent(62, isNoteOn: true); // D4
+            var result = KeySender.Resolve(note, MinstrelAutoKeymap.Instance, currentOctave: 0, autoSwap: true, shiftDelayMs: 50, enableKeyHold: true);
+
+            Assert.That(result.Actions, Has.Length.EqualTo(2));
+            Assert.That(result.Actions[0].EventType, Is.EqualTo(KeyEventType.KeyTap)); // shift
+            Assert.That(result.Actions[1].EventType, Is.EqualTo(KeyEventType.KeyDown)); // note
+        }
+
+        [Test]
+        public void Send_KeyHold_DuplicateNoteOn_SuppressesSecondDown()
+        {
+            using var thread = new KeySendThread((SendAction _) => { });
+            thread.Start();
+
+            var sender = new KeySender(thread);
+            var noteOn = new MidiNoteEvent(48, isNoteOn: true); // C3
+
+            KeySendResult? first = null;
+            KeySendResult? second = null;
+            sender.NoteProcessed += (evt, result) =>
+            {
+                if (evt.NoteNumber == 48 && evt.IsNoteOn && first == null)
+                    first = result;
+                else if (evt.NoteNumber == 48 && evt.IsNoteOn)
+                    second = result;
+            };
+
+            sender.Send(noteOn, MinstrelAutoKeymap.Instance, autoSwap: true, shiftDelayMs: 0, enableKeyHold: true);
+            sender.Send(noteOn, MinstrelAutoKeymap.Instance, autoSwap: true, shiftDelayMs: 0, enableKeyHold: true);
+
+            Assert.That(first, Is.Not.Null);
+            Assert.That(first!.Value.Actions, Has.Length.EqualTo(1));
+            Assert.That(first.Value.Actions[0].EventType, Is.EqualTo(KeyEventType.KeyDown));
+
+            Assert.That(second, Is.Not.Null);
+            Assert.That(second!.Value.Actions, Is.Empty);
+            Assert.That(second.Value.WasSuppressed, Is.True);
+        }
+
+        [Test]
+        public void Send_KeyHold_NoteOffWhileStillHeld_SuppressesUp()
+        {
+            using var thread = new KeySendThread((SendAction _) => { });
+            thread.Start();
+
+            var sender = new KeySender(thread);
+            var noteOn = new MidiNoteEvent(48, isNoteOn: true); // C3
+            var noteOff = new MidiNoteEvent(48, isNoteOn: false);
+
+            // Send note-on twice to get refcount = 2
+            sender.Send(noteOn, MinstrelAutoKeymap.Instance, autoSwap: true, shiftDelayMs: 0, enableKeyHold: true);
+            sender.Send(noteOn, MinstrelAutoKeymap.Instance, autoSwap: true, shiftDelayMs: 0, enableKeyHold: true);
+
+            // Now note-off once; refcount should go to 1, no key-up sent
+            KeySendResult? offResult = null;
+            sender.NoteProcessed += (evt, result) =>
+            {
+                if (!evt.IsNoteOn)
+                    offResult = result;
+            };
+
+            sender.Send(noteOff, MinstrelAutoKeymap.Instance, autoSwap: true, shiftDelayMs: 0, enableKeyHold: true);
+
+            Assert.That(offResult, Is.Not.Null);
+            Assert.That(offResult!.Value.Actions, Is.Empty);
+            Assert.That(offResult.Value.WasSuppressed, Is.True);
+        }
+
+        [Test]
+        public void Send_KeyHold_NoteOffWithoutNoteOn_SendsKeyUp()
+        {
+            using var thread = new KeySendThread((SendAction _) => { });
+            thread.Start();
+
+            var sender = new KeySender(thread);
+            var noteOff = new MidiNoteEvent(48, isNoteOn: false);
+
+            KeySendResult? offResult = null;
+            sender.NoteProcessed += (evt, result) => offResult = result;
+            sender.Send(noteOff, MinstrelAutoKeymap.Instance, autoSwap: true, shiftDelayMs: 0, enableKeyHold: true);
+
+            Assert.That(offResult, Is.Not.Null);
+            Assert.That(offResult!.Value.Actions, Has.Length.EqualTo(1));
+            Assert.That(offResult.Value.Actions[0].EventType, Is.EqualTo(KeyEventType.KeyUp));
+            Assert.That(offResult.Value.WasSuppressed, Is.False);
+        }
+
+        [Test]
+        public void Send_KeyHold_ReleaseAllHeldKeys_ClearsTracker()
+        {
+            using var thread = new KeySendThread((SendAction _) => { });
+            thread.Start();
+
+            var sender = new KeySender(thread);
+            var noteOn = new MidiNoteEvent(48, isNoteOn: true);
+
+            sender.Send(noteOn, MinstrelAutoKeymap.Instance, autoSwap: true, shiftDelayMs: 0, enableKeyHold: true);
+
+            // Release all held keys clears the tracker
+            sender.ReleaseAllHeldKeys();
+
+            // Next note-on should send a new KeyDown because tracker is empty
+            KeySendResult? afterRelease = null;
+            sender.NoteProcessed += (evt, result) => afterRelease = result;
+            sender.Send(noteOn, MinstrelAutoKeymap.Instance, autoSwap: true, shiftDelayMs: 0, enableKeyHold: true);
+
+            Assert.That(afterRelease, Is.Not.Null);
+            Assert.That(afterRelease!.Value.Actions, Has.Length.EqualTo(1));
+            Assert.That(afterRelease.Value.Actions[0].EventType, Is.EqualTo(KeyEventType.KeyDown));
+            Assert.That(afterRelease.Value.WasSuppressed, Is.False);
+        }
+
+        [Test]
+        public void Send_KeyHold_NoteOffAfterOctaveShift_ReleasesOriginalKey()
+        {
+            using var thread = new KeySendThread((SendAction _) => { });
+            thread.Start();
+
+            var sender = new KeySender(thread);
+            var noteOnC3 = new MidiNoteEvent(48, isNoteOn: true); // C3 -> "1"
+            var noteOnD4 = new MidiNoteEvent(62, isNoteOn: true); // D4 -> shift up + "2"
+            var noteOffC3 = new MidiNoteEvent(48, isNoteOn: false);
+
+            KeySendResult? c3Up = null;
+            sender.NoteProcessed += (evt, result) =>
+            {
+                if (evt.NoteNumber == 48 && !evt.IsNoteOn)
+                    c3Up = result;
+            };
+
+            sender.Send(noteOnC3, MinstrelAutoKeymap.Instance, autoSwap: true, shiftDelayMs: 0, enableKeyHold: true);
+            sender.Send(noteOnD4, MinstrelAutoKeymap.Instance, autoSwap: true, shiftDelayMs: 0, enableKeyHold: true);
+            sender.Send(noteOffC3, MinstrelAutoKeymap.Instance, autoSwap: true, shiftDelayMs: 0, enableKeyHold: true);
+
+            Assert.That(c3Up, Is.Not.Null);
+            Assert.That(c3Up!.Value.Actions, Has.Length.EqualTo(1));
+            Assert.That(c3Up.Value.Actions[0].EventType, Is.EqualTo(KeyEventType.KeyUp));
+            Assert.That(c3Up.Value.Actions[0].ScanCode, Is.EqualTo(0x02u)); // still "1"
+        }
+
+        [Test]
+        public void Send_KeyHold_AltOctaveMidHold_ReleasesAltKey()
+        {
+            using var thread = new KeySendThread((SendAction _) => { });
+            thread.Start();
+
+            var sender = new KeySender(thread);
+            var noteOnC4 = new MidiNoteEvent(60, isNoteOn: true); // C4 at oct 0 -> alt key "8"
+            var noteOnD4 = new MidiNoteEvent(62, isNoteOn: true); // D4 -> shift up + "2"
+            var noteOffC4 = new MidiNoteEvent(60, isNoteOn: false);
+
+            KeySendResult? c4Down = null;
+            KeySendResult? c4Up = null;
+            sender.NoteProcessed += (evt, result) =>
+            {
+                if (evt.NoteNumber == 60 && evt.IsNoteOn)
+                    c4Down = result;
+                else if (evt.NoteNumber == 60 && !evt.IsNoteOn)
+                    c4Up = result;
+            };
+
+            sender.Send(noteOnC4, MinstrelAutoKeymap.Instance, autoSwap: true, shiftDelayMs: 0, enableKeyHold: true);
+            sender.Send(noteOnD4, MinstrelAutoKeymap.Instance, autoSwap: true, shiftDelayMs: 0, enableKeyHold: true);
+            sender.Send(noteOffC4, MinstrelAutoKeymap.Instance, autoSwap: true, shiftDelayMs: 0, enableKeyHold: true);
+
+            Assert.That(c4Down, Is.Not.Null);
+            Assert.That(c4Down!.Value.Actions, Has.Length.EqualTo(1));
+            Assert.That(c4Down.Value.Actions[0].ScanCode, Is.EqualTo(0x09u)); // "8" via alt octave
+
+            Assert.That(c4Up, Is.Not.Null);
+            Assert.That(c4Up!.Value.Actions, Has.Length.EqualTo(1));
+            Assert.That(c4Up.Value.Actions[0].EventType, Is.EqualTo(KeyEventType.KeyUp));
+            Assert.That(c4Up.Value.Actions[0].ScanCode, Is.EqualTo(0x09u)); // still "8", not "1"
         }
     }
 }

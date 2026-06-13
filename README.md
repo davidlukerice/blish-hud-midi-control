@@ -56,7 +56,7 @@ flowchart LR
 
 1. **MIDI Input** — NAudio opens the selected device and collects `NoteOn`/`NoteOff` messages on a background thread. Events are placed into a `ConcurrentQueue`. `ConnectionEvaluator` checks device health every 10 s and auto-reconnects if the device disappears or reappears.
 2. **Guard Gates** — `Module.Update()` drops queued notes when sending is disabled via the toggle keybind or when the focus guard is active and GW2 is not running.
-3. **Key Resolution** — Allowed events are passed to `KeySender` along with the active `Keymap` (resolved from `KeymapRegistry`). `KeySender` runs octave-shift logic (auto-swap, alt-octave, multi-shift delay), translates key names to scan codes via `KeyToScanCode`, and produces `SendAction`s. `NoteOff` events are currently received but produce no output.
+3. **Key Resolution** — Allowed events are passed to `KeySender` along with the active `Keymap` (resolved from `KeymapRegistry`). `KeySender` runs octave-shift logic (auto-swap, alt-octave, multi-shift delay), translates key names to scan codes via `KeyToScanCode`, and produces `SendAction`s. In Key Tap mode (default) note-on sends a down+up tap and note-off is ignored. In Key Hold mode note-on sends key-down and note-off sends key-up.
 4. **Diagnostics** — `KeySender` fires a `NoteProcessed` event after each resolved note, driving the live Recent Sends log in the settings UI.
 5. **Key Output** — `KeySendThread` dequeues each `SendAction` and calls `SendInput` with scan codes. KeyTap sends down+up back-to-back; multi-octave shifts insert a configurable sleep between shift presses.
 
@@ -68,6 +68,7 @@ flowchart LR
 - **Custom JSON keymaps** — Create your own keymaps by dropping `.json` files into the module's `midi-keymaps` directory. See [`sample-keymaps/README.md`](sample-keymaps/README.md) for the full format reference, examples, and JSON schema.
 - **Toggle keybind** — A configurable global keybind to quickly enable or disable note sending.
 - **Focus guard** — Optionally block all keypresses when Guild Wars 2 is not in focus.
+- **Key Hold mode** — Optional toggle that sends key-down on MIDI note-on and key-up on note-off, holding GW2 keys for the duration the MIDI note is held. Includes a "Release All Keys" panic button to recover any stuck keys.
 
 ## Requirements
 

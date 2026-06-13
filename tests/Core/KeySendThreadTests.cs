@@ -14,7 +14,7 @@ namespace DavidRice.BlishHud.MidiControl.Tests.Core
         public void EnqueuedActions_AreProcessedInOrder()
         {
             var processed = new List<uint>();
-            using var thread = new KeySendThread(scanCode => processed.Add(scanCode));
+            using var thread = new KeySendThread(action => processed.Add(action.ScanCode));
 
             thread.Start();
             thread.Enqueue(new SendAction(0x02));
@@ -27,14 +27,30 @@ namespace DavidRice.BlishHud.MidiControl.Tests.Core
         }
 
         [Test]
+        public void EnqueuedActions_PreserveEventType()
+        {
+            var processed = new List<KeyEventType>();
+            using var thread = new KeySendThread(action => processed.Add(action.EventType));
+
+            thread.Start();
+            thread.Enqueue(new SendAction(0x02, eventType: KeyEventType.KeyTap));
+            thread.Enqueue(new SendAction(0x02, eventType: KeyEventType.KeyDown));
+            thread.Enqueue(new SendAction(0x02, eventType: KeyEventType.KeyUp));
+
+            thread.Shutdown();
+
+            Assert.That(processed, Is.EqualTo(new[] { KeyEventType.KeyTap, KeyEventType.KeyDown, KeyEventType.KeyUp }));
+        }
+
+        [Test]
         public void Shutdown_WaitsForPendingAction()
         {
             var gate = new ManualResetEventSlim();
             var processed = new List<uint>();
 
-            using var thread = new KeySendThread(scanCode =>
+            using var thread = new KeySendThread(action =>
             {
-                processed.Add(scanCode);
+                processed.Add(action.ScanCode);
                 gate.Set();
             });
 
@@ -50,7 +66,7 @@ namespace DavidRice.BlishHud.MidiControl.Tests.Core
         [Test]
         public void Shutdown_StopsThreadCleanly()
         {
-            using var thread = new KeySendThread(_ => { });
+            using var thread = new KeySendThread((SendAction _) => { });
             thread.Start();
 
             Assert.That(thread.IsAlive, Is.True);
@@ -66,7 +82,7 @@ namespace DavidRice.BlishHud.MidiControl.Tests.Core
             var stopwatch = Stopwatch.StartNew();
             var timestamps = new List<long>();
 
-            using var thread = new KeySendThread(_ => timestamps.Add(stopwatch.ElapsedMilliseconds));
+            using var thread = new KeySendThread((SendAction _) => timestamps.Add(stopwatch.ElapsedMilliseconds));
 
             thread.Start();
             thread.Enqueue(new SendAction(0x02, delayAfterMs: 75));
@@ -84,7 +100,7 @@ namespace DavidRice.BlishHud.MidiControl.Tests.Core
         public void EnqueueAfterShutdown_IsIgnored()
         {
             var processed = new List<uint>();
-            using var thread = new KeySendThread(scanCode => processed.Add(scanCode));
+            using var thread = new KeySendThread(action => processed.Add(action.ScanCode));
 
             thread.Start();
             thread.Shutdown();
@@ -100,7 +116,7 @@ namespace DavidRice.BlishHud.MidiControl.Tests.Core
         [Test]
         public void DoubleShutdown_DoesNotThrow()
         {
-            using var thread = new KeySendThread(_ => { });
+            using var thread = new KeySendThread((SendAction _) => { });
             thread.Start();
             thread.Shutdown();
 

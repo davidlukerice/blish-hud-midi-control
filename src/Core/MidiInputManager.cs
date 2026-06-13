@@ -167,22 +167,11 @@ namespace DavidRice.BlishHud.MidiControl.Core
 
         private void OnMessageReceived(object? sender, MidiInMessageEventArgs e)
         {
-            var midiEvent = e.MidiEvent;
-
-            if (midiEvent is NoteOnEvent noteOn)
+            var noteEvent = MidiEventConverter.TryConvertToMidiNoteEvent(e.MidiEvent);
+            if (noteEvent.HasValue)
             {
-                // MIDI note-on with velocity 0 is actually note-off.
-                if (noteOn.Velocity > 0)
-                {
-                    _noteQueue.Enqueue(new MidiNoteEvent(noteOn.NoteNumber, isNoteOn: true));
-                }
-                else
-                {
-                    _noteQueue.Enqueue(new MidiNoteEvent(noteOn.NoteNumber, isNoteOn: false));
-                }
+                _noteQueue.Enqueue(noteEvent.Value);
             }
-            // NAudio 2.x does not have a separate NoteOffEvent type.
-            // Note-off is represented as NoteOnEvent with velocity 0 (handled above).
         }
 
         private void OnErrorReceived(object? sender, MidiInMessageEventArgs e)

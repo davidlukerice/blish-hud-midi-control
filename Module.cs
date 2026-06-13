@@ -36,6 +36,7 @@ namespace DavidRice.BlishHud.MidiControl
         private SettingEntry<string> _selectedMidiDeviceName = null!;
         private SettingEntry<string> _selectedKeymapId = null!;
         private SettingEntry<bool> _sendNotes = null!;
+        private SettingEntry<bool> _enableKeyHold = null!;
         private SettingEntry<bool> _autoSwapOctave = null!;
         private SettingEntry<int> _multipleOctaveShiftDelay = null!;
         private SettingEntry<bool> _focusGuard = null!;
@@ -87,6 +88,13 @@ namespace DavidRice.BlishHud.MidiControl
             _sendNotes.SettingChanged += OnSendNotesChanged;
             _selectedKeymapId.SettingChanged += OnKeymapChanged;
 
+            _enableKeyHold = settings.DefineSetting(
+                "EnableKeyHold",
+                false,
+                () => "Enable Key Hold",
+                () => "When enabled, MIDI note-on sends a key-down and note-off sends a key-up. Otherwise notes are tapped.");
+            _enableKeyHold.SettingChanged += OnEnableKeyHoldChanged;
+
             _autoSwapOctave = settings.DefineSetting(
                 "AutoSwapOctave",
                 true,
@@ -125,7 +133,7 @@ namespace DavidRice.BlishHud.MidiControl
 
         protected override async Task LoadAsync()
         {
-            _keySendThread = new Core.KeySendThread(SendInputApi.SendKeyTap);
+            _keySendThread = new Core.KeySendThread(HandleSendAction);
             _keySendThread.Start();
 
             _keySender = new Core.KeySender(_keySendThread);
@@ -157,8 +165,15 @@ namespace DavidRice.BlishHud.MidiControl
         protected override void Update(GameTime gameTime)
         {
             bool isRetrying = _midiInputManager.IsRetryingConnection;
+            bool wasDeviceOpen = _midiInputManager.IsDeviceOpen;
 
             _midiInputManager.CheckConnection(_selectedMidiDeviceName.Value);
+
+            // If the device just disconnected, release any held keys so they don't stick.
+            if (wasDeviceOpen && !_midiInputManager.IsDeviceOpen)
+            {
+                ReleaseAllKeys();
+            }
 
             // Refresh corner icon if retrying state changed (disconnect/reconnect).
             if (isRetrying != _wasRetrying)
@@ -187,7 +202,8 @@ namespace DavidRice.BlishHud.MidiControl
                     noteEvent,
                     keymap,
                     _autoSwapOctave.Value,
-                    _multipleOctaveShiftDelay.Value);
+                    _multipleOctaveShiftDelay.Value,
+                    _enableKeyHold.Value);
             }
         }
 
@@ -195,6 +211,7 @@ namespace DavidRice.BlishHud.MidiControl
         {
             _sendNotes.SettingChanged -= OnSendNotesChanged;
             _selectedKeymapId.SettingChanged -= OnKeymapChanged;
+            _enableKeyHold.SettingChanged -= OnEnableKeyHoldChanged;
             _keySender.NoteProcessed -= OnNoteProcessed;
             _toggleSendNotesKeybind.Value.Enabled = false;
             _toggleSendNotesKeybind.Value.Activated -= OnToggleSendNotesKeybind;
@@ -297,6 +314,16 @@ namespace DavidRice.BlishHud.MidiControl
         {
             UpdateCornerIconState();
             SendNotesEnabledChanged?.Invoke(e.NewValue);
+
+            if (!e.NewValue)
+            {
+                ReleaseAllKeys();
+            }
+        }
+
+        private void OnEnableKeyHoldChanged(object sender, ValueChangedEventArgs<bool> e)
+        {
+            ReleaseAllKeys();
         }
 
         private void OnToggleSendNotesKeybind(object sender, EventArgs e)
@@ -306,6 +333,8 @@ namespace DavidRice.BlishHud.MidiControl
 
         private void OnKeymapChanged(object sender, ValueChangedEventArgs<string> e)
         {
+            ReleaseAllKeys();
+
             // Fresh KeySender so the internal octave tracker resets to 0.
             if (_keySendThread != null)
             {
@@ -317,15 +346,42 @@ namespace DavidRice.BlishHud.MidiControl
 
         private void OnNoteProcessed(Core.MidiNoteEvent noteEvent, Core.KeySendResult result)
         {
-            if (result.SentKeyNames.Length == 0)
+            if (result.SentKeyNames.Length == 0 && !result.WasSuppressed)
                 return;
 
             string noteName = Core.MidiNote.GetNoteName(noteEvent.NoteNumber);
             string keys = string.Join(" + ", result.SentKeyNames);
+
+            if (result.WasSuppressed)
+            {
+                // The note key was suppressed by the held-key tracker. Include it in the
+                // log so the user can see which mapped key was skipped.
+                Keymap? keymap = GetActiveKeymap();
+                string mappedNoteName = Core.MidiNote.GetNoteName(noteEvent.NoteNumber);
+                if (keymap != null &&
+                    keymap.Notes.TryGetValue(mappedNoteName, out var definition) &&
+                    definition.Key != null)
+                {
+                    string skippedKey = $"{definition.Key} (skipped)";
+                    keys = string.IsNullOrEmpty(keys)
+                        ? skippedKey
+                        : $"{keys} + {skippedKey}";
+                }
+            }
+
             string octavePrefix = result.PreviousOctave == result.NewOctave
                 ? $"oct {result.NewOctave}"
                 : $"oct {result.PreviousOctave}→{result.NewOctave}";
-            string desc = $"{octavePrefix}: {noteName} → {keys}";
+
+            string suffix = string.Empty;
+            if (_enableKeyHold.Value)
+            {
+                suffix = result.WasSuppressed
+                    ? (noteEvent.IsNoteOn ? " (down - skipped)" : " (up - skipped)")
+                    : (noteEvent.IsNoteOn ? " (down)" : " (up)");
+            }
+
+            string desc = $"{octavePrefix}: {noteName} → {keys}{suffix}";
 
             if (_recentSendLog.Count > 0 && _recentSendLog.Peek() == "No sends yet.")
                 _recentSendLog.Dequeue();
@@ -371,6 +427,12 @@ namespace DavidRice.BlishHud.MidiControl
         {
             get => _sendNotes.Value;
             set => _sendNotes.Value = value;
+        }
+
+        public bool EnableKeyHoldEnabled
+        {
+            get => _enableKeyHold.Value;
+            set => _enableKeyHold.Value = value;
         }
 
         public bool AutoSwapOctaveEnabled
@@ -445,6 +507,8 @@ namespace DavidRice.BlishHud.MidiControl
             {
                 Logger.Warn($"Selected keymap '{currentId}' no longer exists. Falling back to 'minstrel-auto'.");
                 _selectedKeymapId.Value = "minstrel-auto";
+                // Release held keys before resetting KeySender so nothing sticks.
+                ReleaseAllKeys();
                 // Reset KeySender so the internal octave tracker starts fresh.
                 if (_keySendThread != null)
                 {
@@ -456,6 +520,29 @@ namespace DavidRice.BlishHud.MidiControl
         }
 
         // ---- Helpers ----
+
+        private void HandleSendAction(Core.SendAction action)
+        {
+            switch (action.EventType)
+            {
+                case Core.KeyEventType.KeyDown:
+                    SendInputApi.SendKeyDown(action.ScanCode);
+                    break;
+                case Core.KeyEventType.KeyUp:
+                    SendInputApi.SendKeyUp(action.ScanCode);
+                    break;
+                case Core.KeyEventType.KeyTap:
+                default:
+                    SendInputApi.SendKeyTap(action.ScanCode);
+                    break;
+            }
+        }
+
+        public void ReleaseAllKeys()
+        {
+            _keySender?.ReleaseAllHeldKeys();
+            SafetyReleaseAllKeys();
+        }
 
         private static void SafetyReleaseAllKeys()
         {

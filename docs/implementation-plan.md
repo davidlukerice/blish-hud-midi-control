@@ -72,7 +72,7 @@ Rules:
 
 - [ ] Frame Drum Auto keymap
 - [ ] Drum Kit keymap with MIDI drum note mapping
-- [ ] `noteoff` support / true key-down key-up hold behavior
+- [x] `noteoff` support / true key-down key-up hold behavior (Key Hold mode — v0.2.0)
 - [ ] Floating overlay indicator showing last played note (outside settings tab)
 - [ ] Chord support (multi-key bindings per note)
 - [ ] Better handling of 'extra' keys that activate loops, recording, or chords

@@ -55,6 +55,20 @@
       <SpecificVersion>False</SpecificVersion>
       <Private>True</Private>
     </Reference>
+    <Reference
+            Include="NAudio.Core, Version=2.3.0.0, Culture=neutral, PublicKeyToken=null, processorArchitecture=MSIL"
+        >
+      <HintPath>..\packages\NAudio.Core.2.3.0\lib\netstandard2.0\NAudio.Core.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <Private>True</Private>
+    </Reference>
+    <Reference
+            Include="NAudio.Midi, Version=2.3.0.0, Culture=neutral, PublicKeyToken=null, processorArchitecture=MSIL"
+        >
+      <HintPath>..\packages\NAudio.Midi.2.3.0\lib\netstandard2.0\NAudio.Midi.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
   </ItemGroup>

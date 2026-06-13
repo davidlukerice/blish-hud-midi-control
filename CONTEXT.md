@@ -18,7 +18,8 @@ A Blish HUD module that maps MIDI controller input to keyboard keypresses for pl
 | **Focus Guard** | A setting that, when enabled, blocks all key sending when `GameService.GameIntegration.Gw2Instance.IsInGame` is `false`. Prevents accidental keypresses when GW2 is not in focus. |
 | **Corner Icon** | A small icon in Blish HUD's top-left corner icon bar indicating module state. Serves as a safety guard to show whether `sendNotes` is active. Color/icon changes based on active/muted state. |
 | **KeySendThread** | A dedicated background thread that consumes `SendAction` items from a blocking queue, calls `SendInput` for each, and sleeps for configured delays between actions (e.g., multi-octave shifts). Prevents the Blish HUD game loop from stalling during timed key sequences. |
-| **KeyTap** | A single `SendInput` call that sends both key-down and key-up events back-to-back (no hold duration). Initial note behavior; key-hold (`noteoff`) is a planned future improvement. |
+| **Key Tap** | The default note-to-key behavior: a single `SendInput` call that sends both key-down and key-up events back-to-back (no hold duration). Ignores MIDI note-off events. |
+| **Key Hold** | An optional note-to-key behavior where a MIDI note-on sends a key-down event and the matching note-off sends a key-up event. The GW2 key is held for the duration the MIDI note is held. |
 | **Unload Safety** | When the module unloads, key-up events are sent for all possible octave-shift and note keys to prevent stuck key states in GW2. |
 | **MidiInputManager** | Manages NAudio `MidiIn` lifecycle: opens the selected device, registers `MessageReceived`, and buffers events into a `ConcurrentQueue`. All MIDI events are enqueued on a background thread; the queue is drained once per `Module.Update()`. |
 | **KeySender** | Consumes buffered MIDI events from `MidiInputManager`, runs octave-shift logic using the active `Keymap`, and sends keyboard events via P/Invoke `SendInput`. |

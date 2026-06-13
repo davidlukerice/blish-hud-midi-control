@@ -168,6 +168,28 @@ namespace DavidRice.BlishHud.MidiControl.UI
             _module.SendNotesEnabledChanged += OnSendNotesEnabledChanged;
             y += _sendNotesCb.Height + 4;
 
+            var enableKeyHoldCb = new Checkbox
+            {
+                Parent = buildPanel,
+                Text = "Enable Key Hold",
+                Location = new Point(x, y),
+                Checked = _module.EnableKeyHoldEnabled,
+                BasicTooltipText = "When enabled, MIDI note-on sends a key-down and note-off sends a key-up. Otherwise notes are tapped."
+            };
+            enableKeyHoldCb.CheckedChanged += (s, e) => _module.EnableKeyHoldEnabled = e.Checked;
+            y += enableKeyHoldCb.Height + 4;
+
+            var releaseAllKeysBtn = new StandardButton
+            {
+                Parent = buildPanel,
+                Text = "Release All Keys",
+                Location = new Point(x, y),
+                Width = 140,
+                BasicTooltipText = "Force key-up for all instrument keys. Use if a key gets stuck in Key Hold mode."
+            };
+            releaseAllKeysBtn.Click += (s, e) => _module.ReleaseAllKeys();
+            y += releaseAllKeysBtn.Height + 4;
+
             var autoSwapCb = new Checkbox
             {
                 Parent = buildPanel,

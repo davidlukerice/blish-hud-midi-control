@@ -93,6 +93,7 @@
     <Compile Include="src\Keymaps\BuiltIn\BlackLionDrumKeymap.cs" />
     <Compile Include="src\Keymaps\BuiltIn\MinstrelKeymap.cs" />
     <Compile Include="src\Core\KeySendThread.cs" />
+    <Compile Include="src\Core\MidiEventConverter.cs" />
     <Compile Include="src\Core\MidiInputManager.cs" />
     <Compile Include="src\Core\ConnectionEvaluator.cs" />
     <Compile Include="src\Core\MidiNoteEvent.cs" />

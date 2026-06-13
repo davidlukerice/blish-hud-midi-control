@@ -3,6 +3,7 @@
 ## [Unreleased] — v0.2.0
 
 ### Added
+- **Key Hold mode** — New "Enable Key Hold" toggle in settings. When on, MIDI note-on sends a key-down and note-off sends a key-up, so GW2 keys are held for the duration the MIDI note is held. Key Tap mode (down+up per note) remains the default. Includes a "Release All Keys" panic button to recover stuck keys.
 - **Black Lion Drum built-in keymap** — `black-lion-drum`. Maps 15 MIDI notes (`C4`–`E5`) to the Black Lion Drum set Chair's 15 sounds. Cymbals on black keys (`C#4`→F1 Crash, `D#4`→F2 Ride, `F#4`→F4 Hi-Hat Closed, `G#4`→F4 Hi-Hat Open, `A#4`→F5 Hi-Hat Foot); drums on white keys (`C4`/`D4`→1/2 Bass, `E4`/`F4`→4/4 Snare, `G4`→5 Cross Stick, `A4`/`B4`→6/7 Ghost, `C5`/`D5`/`E5`→8/9/0 Toms). No octave swapping.
 - **Frame Drum (Auto) built-in keymap** — `frame-drum-auto`. Maps MIDI notes `C4`–`E4` to the Frame Drum's five percussion sounds on keys `1`–`5`. No octave swapping (the instrument has no octaves).
 - **GW2 gameplay sample keymaps** — Three custom keymaps for non-musical GW2 gameplay: `gw2-gameplay-25key`, `gw2-gameplay-37key`, and `gw2-gameplay-49key`. See `sample-keymaps/README.md` for details.
