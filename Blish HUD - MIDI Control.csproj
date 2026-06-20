@@ -105,6 +105,8 @@
     <Compile Include="src\Input\SendInput.cs" />
     <Compile Include="src\Input\KeyToScanCode.cs" />
     <Compile Include="src\UI\MidiSettingsView.cs" />
+    <Compile Include="src\UI\KeybedControl.cs" />
+    <Compile Include="src\UI\KeymapLayoutTabView.cs" />
     <Compile Include="Module.cs" />
   </ItemGroup>
   <ItemGroup>

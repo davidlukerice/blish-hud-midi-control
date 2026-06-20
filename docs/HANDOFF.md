@@ -26,35 +26,32 @@ See [`docs/design-decisions.md`](design-decisions.md) for the historical record 
 - Configuration validation and error UI for malformed custom keymaps
 - Better handling of 'extra' keys that activate loops, recording, or chords
 
-## Current Session — Keybed Layout Preview — Chunk A Complete
+## Current Session — Keybed Layout Preview — Chunk B Complete
 
-**Chunk A** (domain model and calculator) is implemented, built, and all new tests pass.
+**Chunk B** (UI tab and rendering) is implemented, built, and visually verified in-game.
 
 ### What was done
-- `MidiNote.TryParseNoteName(string, out int)` — parses natural, sharp, flat, and enharmonic note names; rejects invalid input.
-- `KeybedKey` — immutable data shape for a single rendered piano key.
-- `KeybedLayout` — container for the full layout with `StartOctave`, `EndOctave`, and `IsEmpty`.
-- `KeybedLayoutCalculator.Calculate(Keymap)` — pure function that turns a `Keymap` into a `KeybedLayout`:
-  - Full octave span from lowest to highest mapped octave.
-  - Empty intermediate octaves included.
-  - Black/white key identification.
-  - Key-switch detection (`OctaveDownKey` / `OctaveUpKey`).
-  - Alt-octave info preserved.
-  - Original note name from the keymap preserved (e.g. `Bb3` stays `Bb3`, not normalized to `A#3`).
-- Tests:
-  - `MidiNoteTests.TryParseNoteName_*` (8 tests)
-  - `KeybedLayoutCalculatorTests` (9 tests)
-- Also added `SkipCopyBhmToModules` condition to the `.csproj` post-build target to avoid xcopy sharing-violation errors while Blish HUD is running.
+- `KeybedControl` — custom `Control` that overrides `Paint(SpriteBatch, Rectangle)` to render a `KeybedLayout` as piano keys:
+  - White keys drawn first, black keys overlaid between them (65% width, 60% height)
+  - Mapped keys show their GW2 key label centered; unmapped keys shown muted
+  - Key-switches (`OctaveDownKey` / `OctaveUpKey`) get an orange border
+  - 1×1 pixel texture created via `GraphicsDeviceManager` for drawing filled rects
+- `KeymapLayoutTabView` — new `IView` tab in `TabbedWindow2`:
+  - Keymap dropdown for preview selection (does not affect active playing keymap)
+  - Info label: `Octaves N–M  |  X mapped notes`
+  - `KeybedControl` at 420×180
+- `Module.cs` — second tab `"Keymap Layout"` added with dedicated `layout.png` icon loaded from `ref/layout.png` via `ContentsManager`
+- `Blish HUD - MIDI Control.csproj` — added `KeybedControl.cs` and `KeymapLayoutTabView.cs`
 
 ### Files changed
-- `src/Core/MidiNote.cs`
-- `src/Keymaps/Visualization/KeybedKey.cs`
-- `src/Keymaps/Visualization/KeybedLayout.cs`
-- `src/Keymaps/Visualization/KeybedLayoutCalculator.cs`
-- `tests/Core/MidiNoteTests.cs`
-- `tests/Keymaps/Visualization/KeybedLayoutCalculatorTests.cs`
+- `src/UI/KeybedControl.cs` (new)
+- `src/UI/KeymapLayoutTabView.cs` (new)
+- `src/UI/MidiSettingsView.cs` (unchanged — still only on Settings tab)
+- `Module.cs`
 - `Blish HUD - MIDI Control.csproj`
-- `tests/DavidRice.BlishHud.MidiControl.Tests.csproj`
 
 ### Outstanding / Follow-up
 - **25 pre-existing `KeymapRegistryTests` failures**: these error with `FileNotFoundException` for `Blish HUD.dll` because the assembly reference in the main `.csproj` has `<Private>False</Private>`, so Blish HUD dependencies are not copied to the test output directory. Fixing this copy-local behavior is out of scope for the keybed feature but should be addressed so the full test suite is green.
+- **Potential visual refinements**: key labels on very narrow keys may overflow; consider reducing font size or showing labels only on white keys. Consider adding note name labels beneath keys (e.g., "C3"). Consider a scrollbar or horizontal overflow for keymaps spanning many octaves.
+- **Mouse interaction**: hover/select feedback on keys, click-to-preview-sound (future), or click-to-see-note-details tooltip.
+- **Settings ↔ Layout tab sync**: currently independent. Consider whether selecting a keymap on the Layout tab should optionally sync back to the active keymap.

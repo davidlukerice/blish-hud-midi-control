@@ -60,6 +60,7 @@ namespace DavidRice.BlishHud.MidiControl
         private Texture2D? _disconnectedIconTexture;
         private TabbedWindow2? _settingsWindow;
         private Blish_HUD.Content.AsyncTexture2D? _settingsTabIcon;
+        private Blish_HUD.Content.AsyncTexture2D? _layoutTabIcon;
 
         [ImportingConstructor]
         public MidiModule([Import("ModuleParameters")] ModuleParameters moduleParameters) : base(moduleParameters) { }
@@ -248,6 +249,7 @@ namespace DavidRice.BlishHud.MidiControl
                 _mutedIconTexture = ContentsManager.GetTexture("icon_off.png");
                 _disconnectedIconTexture = ContentsManager.GetTexture("icon_disconnected.png");
                 _settingsTabIcon = new Blish_HUD.Content.AsyncTexture2D(ContentsManager.GetTexture("icon.png"));
+                _layoutTabIcon = new Blish_HUD.Content.AsyncTexture2D(ContentsManager.GetTexture("layout.png"));
 
                 _cornerIcon = new CornerIcon
                 {
@@ -275,6 +277,7 @@ namespace DavidRice.BlishHud.MidiControl
                                 Id = $"{nameof(MidiModule)}_Settings_6a2b3c4d"
                             };
                             _settingsWindow.Tabs.Add(new Tab(_settingsTabIcon, () => new MidiSettingsTabView(this), "Settings"));
+                            _settingsWindow.Tabs.Add(new Tab(_layoutTabIcon, () => new KeymapLayoutTabView(this), "Keymap Layout"));
                         }
                         _settingsWindow.ToggleWindow();
                     }
