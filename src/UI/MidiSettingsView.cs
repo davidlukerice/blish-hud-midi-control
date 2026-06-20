@@ -277,6 +277,8 @@ namespace DavidRice.BlishHud.MidiControl.UI
 
             RefreshDevices();
             RefreshKeymaps();
+
+            _module.SelectedKeymapChanged += OnSelectedKeymapChanged;
         }
 
         private void RefreshDevices()
@@ -386,6 +388,23 @@ namespace DavidRice.BlishHud.MidiControl.UI
             if (_onLogUpdate != null)
                 _module.RecentSendLogUpdated -= _onLogUpdate;
             _module.SendNotesEnabledChanged -= OnSendNotesEnabledChanged;
+            _module.SelectedKeymapChanged -= OnSelectedKeymapChanged;
+        }
+
+        private void OnSelectedKeymapChanged(string keymapId)
+        {
+            var currentName = _keymapDropdown?.SelectedItem;
+            var currentKeymap = _module.AvailableKeymaps.FirstOrDefault(k => k.Name == currentName);
+            if (currentKeymap?.Id == keymapId) return;
+
+            var keymap = _module.AvailableKeymaps.FirstOrDefault(k => k.Id == keymapId);
+            if (keymap == null) return;
+
+            _keymapDropdown!.ValueChanged -= OnKeymapSelected;
+            _keymapDropdown.SelectedItem = keymap.Name;
+            _keymapDropdown.ValueChanged += OnKeymapSelected;
+
+            RefreshPreview();
         }
 
         private void OnSendNotesEnabledChanged(bool enabled)

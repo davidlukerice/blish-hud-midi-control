@@ -14,7 +14,7 @@ namespace DavidRice.BlishHud.MidiControl.UI
 {
     /// <summary>
     /// Settings tab that shows a visual keybed preview for any selected keymap.
-    /// The selected keymap here is for preview only — it does not affect the active playing keymap.
+    /// Selecting a keymap here also updates the active playing keymap.
     /// </summary>
     public class KeymapLayoutTabView : IView
     {
@@ -92,11 +92,12 @@ namespace DavidRice.BlishHud.MidiControl.UI
             };
 
             PopulateDropdown();
+            _module.SelectedKeymapChanged += OnSelectedKeymapChanged;
         }
 
         public void DoUnload()
         {
-            // Nothing to explicitly clean up.
+            _module.SelectedKeymapChanged -= OnSelectedKeymapChanged;
         }
 
         private void PopulateDropdown()
@@ -120,7 +121,26 @@ namespace DavidRice.BlishHud.MidiControl.UI
 
             // Trigger initial preview.
             if (_keymapDropdown.SelectedItem != null)
-                OnKeymapSelected(null, EventArgs.Empty);
+            {
+                var initialKeymap = _module.AvailableKeymaps.FirstOrDefault(k => k.Name == _keymapDropdown.SelectedItem);
+                UpdatePreview(initialKeymap);
+            }
+        }
+
+        private void OnSelectedKeymapChanged(string keymapId)
+        {
+            var currentName = _keymapDropdown?.SelectedItem;
+            var currentKeymap = _module.AvailableKeymaps.FirstOrDefault(k => k.Name == currentName);
+            if (currentKeymap?.Id == keymapId) return;
+
+            var keymap = _module.AvailableKeymaps.FirstOrDefault(k => k.Id == keymapId);
+            if (keymap == null) return;
+
+            _keymapDropdown!.ValueChanged -= OnKeymapSelected;
+            _keymapDropdown.SelectedItem = keymap.Name;
+            _keymapDropdown.ValueChanged += OnKeymapSelected;
+
+            UpdatePreview(keymap);
         }
 
         private void OnKeymapSelected(object? sender, EventArgs e)
@@ -128,14 +148,23 @@ namespace DavidRice.BlishHud.MidiControl.UI
             var selectedName = _keymapDropdown?.SelectedItem;
             if (string.IsNullOrEmpty(selectedName))
             {
-                if (_keybedControl != null)
-                    _keybedControl.Layout = KeybedLayout.Empty;
-                if (_keymapInfoLabel != null)
-                    _keymapInfoLabel.Text = "";
+                UpdatePreview(null);
                 return;
             }
 
             var keymap = _module.AvailableKeymaps.FirstOrDefault(k => k.Name == selectedName);
+            if (keymap == null)
+            {
+                UpdatePreview(null);
+                return;
+            }
+
+            _module.SelectKeymap(keymap.Id);
+            UpdatePreview(keymap);
+        }
+
+        private void UpdatePreview(Keymap? keymap)
+        {
             if (keymap == null)
             {
                 if (_keybedControl != null)
@@ -149,7 +178,6 @@ namespace DavidRice.BlishHud.MidiControl.UI
             if (_keybedControl != null)
                 _keybedControl.Layout = layout;
 
-            // Update info label.
             if (_keymapInfoLabel != null)
             {
                 int mappedCount = layout.Keys.Count(k => k.IsMapped);

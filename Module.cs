@@ -425,6 +425,7 @@ namespace DavidRice.BlishHud.MidiControl
         public string SelectedKeymapId => _selectedKeymapId.Value;
 
         public event Action<bool>? SendNotesEnabledChanged;
+        public event Action<string>? SelectedKeymapChanged;
 
         public bool SendNotesEnabled
         {
@@ -497,6 +498,7 @@ namespace DavidRice.BlishHud.MidiControl
         public void SelectKeymap(string id)
         {
             _selectedKeymapId.Value = id;
+            SelectedKeymapChanged?.Invoke(id);
         }
 
         public void ReloadKeymaps()
@@ -510,6 +512,7 @@ namespace DavidRice.BlishHud.MidiControl
             {
                 Logger.Warn($"Selected keymap '{currentId}' no longer exists. Falling back to 'minstrel-auto'.");
                 _selectedKeymapId.Value = "minstrel-auto";
+                SelectedKeymapChanged?.Invoke("minstrel-auto");
                 // Release held keys before resetting KeySender so nothing sticks.
                 ReleaseAllKeys();
                 // Reset KeySender so the internal octave tracker starts fresh.
