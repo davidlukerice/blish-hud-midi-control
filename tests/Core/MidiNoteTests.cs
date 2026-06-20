@@ -36,5 +36,64 @@ namespace DavidRice.BlishHud.MidiControl.Tests.Core
             // Highest MIDI note (127) is G9
             Assert.That(MidiNote.GetNoteName(127), Is.EqualTo("G9"));
         }
+
+        [Test]
+        public void TryParseNoteName_NaturalNotes_AreCorrect()
+        {
+            Assert.That(MidiNote.TryParseNoteName("C4", out int c4), Is.True);
+            Assert.That(c4, Is.EqualTo(60));
+
+            Assert.That(MidiNote.TryParseNoteName("C-1", out int cNeg1), Is.True);
+            Assert.That(cNeg1, Is.EqualTo(0));
+
+            Assert.That(MidiNote.TryParseNoteName("G9", out int g9), Is.True);
+            Assert.That(g9, Is.EqualTo(127));
+        }
+
+        [Test]
+        public void TryParseNoteName_SharpNotes_AreCorrect()
+        {
+            Assert.That(MidiNote.TryParseNoteName("C#4", out int note), Is.True);
+            Assert.That(note, Is.EqualTo(61));
+
+            Assert.That(MidiNote.TryParseNoteName("F#4", out note), Is.True);
+            Assert.That(note, Is.EqualTo(66));
+
+            Assert.That(MidiNote.TryParseNoteName("C#5", out note), Is.True);
+            Assert.That(note, Is.EqualTo(73));
+        }
+
+        [Test]
+        public void TryParseNoteName_FlatNotes_AreCorrect()
+        {
+            Assert.That(MidiNote.TryParseNoteName("Db4", out int db4), Is.True);
+            Assert.That(db4, Is.EqualTo(61));
+
+            Assert.That(MidiNote.TryParseNoteName("Bb3", out int bb3), Is.True);
+            Assert.That(bb3, Is.EqualTo(58));
+
+            Assert.That(MidiNote.TryParseNoteName("Eb4", out int eb4), Is.True);
+            Assert.That(eb4, Is.EqualTo(63));
+        }
+
+        [Test]
+        public void TryParseNoteName_EnharmonicEquivalents_AreCorrect()
+        {
+            Assert.That(MidiNote.TryParseNoteName("B#3", out int bSharp3), Is.True);
+            Assert.That(bSharp3, Is.EqualTo(60));
+
+            Assert.That(MidiNote.TryParseNoteName("Cb4", out int cFlat4), Is.True);
+            Assert.That(cFlat4, Is.EqualTo(59));
+        }
+
+        [Test]
+        public void TryParseNoteName_InvalidInputs_ReturnFalse()
+        {
+            Assert.That(MidiNote.TryParseNoteName("H3", out _), Is.False);
+            Assert.That(MidiNote.TryParseNoteName("C", out _), Is.False);
+            Assert.That(MidiNote.TryParseNoteName("4", out _), Is.False);
+            Assert.That(MidiNote.TryParseNoteName("", out _), Is.False);
+            Assert.That(MidiNote.TryParseNoteName(null!, out _), Is.False);
+        }
     }
 }

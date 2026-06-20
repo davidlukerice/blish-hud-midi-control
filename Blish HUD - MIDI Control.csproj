@@ -77,6 +77,9 @@
     <Compile Include="src\Keymaps\NoteDefinition.cs" />
     <Compile Include="src\Keymaps\KeymapRegistry.cs" />
     <Compile Include="src\Keymaps\KeymapPreviewFormatter.cs" />
+    <Compile Include="src\Keymaps\Visualization\KeybedKey.cs" />
+    <Compile Include="src\Keymaps\Visualization\KeybedLayout.cs" />
+    <Compile Include="src\Keymaps\Visualization\KeybedLayoutCalculator.cs" />
     <Compile Include="src\Keymaps\BuiltIn\MinstrelAutoKeymap.cs" />
     <Compile Include="src\Keymaps\BuiltIn\GeneralKeymap.cs" />
     <Compile Include="src\Keymaps\BuiltIn\GrandPianoAutoKeymap.cs" />
@@ -346,7 +349,7 @@
     <PostBuildEvent>
     </PostBuildEvent>
   </PropertyGroup>
-  <Target Name="CopyBhmToModules" AfterTargets="BuildBlishHUDModule">
+  <Target Name="CopyBhmToModules" AfterTargets="BuildBlishHUDModule" Condition="'$(SkipCopyBhmToModules)' != 'true'">
     <Exec Command="xcopy /Y &quot;$(TargetDir)$(TargetName).bhm&quot; &quot;%25USERPROFILE%25\Documents\Guild Wars 2\addons\blishhud\modules\&quot;" />
   </Target>
   <Import

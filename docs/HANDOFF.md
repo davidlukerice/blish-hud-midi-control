@@ -26,15 +26,35 @@ See [`docs/design-decisions.md`](design-decisions.md) for the historical record 
 - Configuration validation and error UI for malformed custom keymaps
 - Better handling of 'extra' keys that activate loops, recording, or chords
 
-## Current Session — Keybed Layout Preview Design
+## Current Session — Keybed Layout Preview — Chunk A Complete
 
-The design for the Keybed Layout Preview feature is complete. Decisions are recorded in `CONTEXT.md` and the implementation plan is in `docs/keybed-layout-preview-plan.md`.
+**Chunk A** (domain model and calculator) is implemented, built, and all new tests pass.
 
-### Status
-- Design finalized; no implementation started.
-- Ready to begin **Chunk A** (domain model and calculator) in the next session.
+### What was done
+- `MidiNote.TryParseNoteName(string, out int)` — parses natural, sharp, flat, and enharmonic note names; rejects invalid input.
+- `KeybedKey` — immutable data shape for a single rendered piano key.
+- `KeybedLayout` — container for the full layout with `StartOctave`, `EndOctave`, and `IsEmpty`.
+- `KeybedLayoutCalculator.Calculate(Keymap)` — pure function that turns a `Keymap` into a `KeybedLayout`:
+  - Full octave span from lowest to highest mapped octave.
+  - Empty intermediate octaves included.
+  - Black/white key identification.
+  - Key-switch detection (`OctaveDownKey` / `OctaveUpKey`).
+  - Alt-octave info preserved.
+  - Original note name from the keymap preserved (e.g. `Bb3` stays `Bb3`, not normalized to `A#3`).
+- Tests:
+  - `MidiNoteTests.TryParseNoteName_*` (8 tests)
+  - `KeybedLayoutCalculatorTests` (9 tests)
+- Also added `SkipCopyBhmToModules` condition to the `.csproj` post-build target to avoid xcopy sharing-violation errors while Blish HUD is running.
 
-### Next Session
-1. Read `docs/keybed-layout-preview-plan.md`.
-2. Implement **Chunk A**: `MidiNote.TryParseNoteName`, `KeybedKey`, `KeybedLayout`, `KeybedLayoutCalculator`, plus unit tests.
-3. Build, run tests, and review with the user before moving to Chunk B.
+### Files changed
+- `src/Core/MidiNote.cs`
+- `src/Keymaps/Visualization/KeybedKey.cs`
+- `src/Keymaps/Visualization/KeybedLayout.cs`
+- `src/Keymaps/Visualization/KeybedLayoutCalculator.cs`
+- `tests/Core/MidiNoteTests.cs`
+- `tests/Keymaps/Visualization/KeybedLayoutCalculatorTests.cs`
+- `Blish HUD - MIDI Control.csproj`
+- `tests/DavidRice.BlishHud.MidiControl.Tests.csproj`
+
+### Outstanding / Follow-up
+- **25 pre-existing `KeymapRegistryTests` failures**: these error with `FileNotFoundException` for `Blish HUD.dll` because the assembly reference in the main `.csproj` has `<Private>False</Private>`, so Blish HUD dependencies are not copied to the test output directory. Fixing this copy-local behavior is out of scope for the keybed feature but should be addressed so the full test suite is green.
