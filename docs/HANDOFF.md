@@ -25,3 +25,16 @@ See [`docs/design-decisions.md`](design-decisions.md) for the historical record 
 - Chord support for instruments with multi-key bindings
 - Configuration validation and error UI for malformed custom keymaps
 - Better handling of 'extra' keys that activate loops, recording, or chords
+
+## Current Session — Keybed Layout Preview Design
+
+The design for the Keybed Layout Preview feature is complete. Decisions are recorded in `CONTEXT.md` and the implementation plan is in `docs/keybed-layout-preview-plan.md`.
+
+### Status
+- Design finalized; no implementation started.
+- Ready to begin **Chunk A** (domain model and calculator) in the next session.
+
+### Next Session
+1. Read `docs/keybed-layout-preview-plan.md`.
+2. Implement **Chunk A**: `MidiNote.TryParseNoteName`, `KeybedKey`, `KeybedLayout`, `KeybedLayoutCalculator`, plus unit tests.
+3. Build, run tests, and review with the user before moving to Chunk B.
