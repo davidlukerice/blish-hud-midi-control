@@ -70,7 +70,8 @@ Rules:
 
 ## Deferred / Future
 
-- [ ] Frame Drum Auto keymap
+- [x] Frame Drum Auto keymap (added in v0.2.0)
+- [x] Keybed Layout Preview (added in v0.2.0 — see `docs/keybed-layout-preview-plan.md`)
 - [ ] Drum Kit keymap with MIDI drum note mapping
 - [x] `noteoff` support / true key-down key-up hold behavior (Key Hold mode — v0.2.0)
 - [ ] Floating overlay indicator showing last played note (outside settings tab)

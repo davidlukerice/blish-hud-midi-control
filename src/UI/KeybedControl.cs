@@ -18,8 +18,18 @@ namespace DavidRice.BlishHud.MidiControl.UI
     {
         private static readonly Logger Logger = Logger.GetLogger<KeybedControl>();
 
+        private const int WhiteKeyWidth = 24;
+        private const int KeyPadding = 4;
+        private const int DefaultWidth = 420;
+        private const int DefaultHeight = 96;
+
         private KeybedLayout _layout = KeybedLayout.Empty;
         private static Texture2D? _pixelTexture;
+
+        public KeybedControl()
+        {
+            Size = new Point(DefaultWidth, DefaultHeight);
+        }
 
         public KeybedLayout Layout
         {
@@ -28,11 +38,29 @@ namespace DavidRice.BlishHud.MidiControl.UI
             {
                 if (_layout == value) return;
                 _layout = value;
+
+                if (_layout.IsEmpty)
+                {
+                    Size = new Point(DefaultWidth, DefaultHeight);
+                }
+                else
+                {
+                    int whiteKeyCount = _layout.Keys.Count(k => !k.IsBlackKey);
+                    int desiredWidth = whiteKeyCount * WhiteKeyWidth + KeyPadding * 2;
+                    Size = new Point(desiredWidth, DefaultHeight);
+                }
+
+                Invalidate();
             }
         }
 
         protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds)
         {
+            // bounds arrives in local coordinates (origin 0,0). Blish HUD's scissor is in screen
+            // space and there is no implicit local-to-screen transform inside SpriteBatch.Begin,
+            // so we must offset to the control's actual position on screen before drawing.
+            bounds.Offset(this.AbsoluteBounds.X, this.AbsoluteBounds.Y);
+
             if (_layout.IsEmpty)
             {
                 DrawEmptyMessage(spriteBatch, bounds);
@@ -59,18 +87,16 @@ namespace DavidRice.BlishHud.MidiControl.UI
             int whiteKeyCount = layout.Keys.Count(k => !k.IsBlackKey);
             if (whiteKeyCount == 0) return;
 
-            const int padding = 4;
-            int availableWidth = bounds.Width - padding * 2;
-            int availableHeight = bounds.Height - padding * 2;
-
+            int availableWidth = bounds.Width - KeyPadding * 2;
+            int availableHeight = bounds.Height - KeyPadding * 2;
             float whiteKeyWidth = availableWidth / (float)whiteKeyCount;
             float blackKeyWidth = whiteKeyWidth * 0.65f;
             int whiteKeyHeight = availableHeight;
             int blackKeyHeight = (int)(availableHeight * 0.6f);
 
             var whiteKeyRects = new Dictionary<int, Rectangle>();
-            float x = bounds.X + padding;
-            int y = bounds.Y + padding;
+            float x = bounds.X + KeyPadding;
+            int y = bounds.Y + KeyPadding;
 
             // First pass: white keys
             foreach (var key in layout.Keys)

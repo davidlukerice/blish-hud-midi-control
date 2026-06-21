@@ -1,8 +1,8 @@
 # Agent Handoff — Blish HUD MIDI Control
 
-## Current State
-
 Latest release: **v0.1.0** (released 2026-05-31).
+
+## Current State
 
 ### Core Implementation
 - Domain model: `NoteDefinition`, `Keymap`, `KeySendResult`
@@ -21,37 +21,45 @@ Latest release: **v0.1.0** (released 2026-05-31).
 See [`docs/design-decisions.md`](design-decisions.md) for the historical record of significant design decisions.
 
 ### Deferred / Future
-- Better visualization of keymap previews
 - Chord support for instruments with multi-key bindings
 - Configuration validation and error UI for malformed custom keymaps
 - Better handling of 'extra' keys that activate loops, recording, or chords
 
-## Current Session — Keybed Layout Preview — Chunk B Complete
+---
 
-**Chunk B** (UI tab and rendering) is implemented, built, and visually verified in-game.
+## Current Session — Keybed Layout Preview — Chunk C & Key Rendering Fixes
 
 ### What was done
-- `KeybedControl` — custom `Control` that overrides `Paint(SpriteBatch, Rectangle)` to render a `KeybedLayout` as piano keys:
-  - White keys drawn first, black keys overlaid between them (65% width, 60% height)
-  - Mapped keys show their GW2 key label centered; unmapped keys shown muted
-  - Key-switches (`OctaveDownKey` / `OctaveUpKey`) get an orange border
-  - 1×1 pixel texture created via `GraphicsDeviceManager` for drawing filled rects
-- `KeymapLayoutTabView` — new `IView` tab in `TabbedWindow2`:
-  - Keymap dropdown for preview selection (does not affect active playing keymap)
-  - Info label: `Octaves N–M  |  X mapped notes`
-  - `KeybedControl` at 420×180
-- `Module.cs` — second tab `"Keymap Layout"` added with dedicated `layout.png` icon loaded from `ref/layout.png` via `ContentsManager`
-- `Blish HUD - MIDI Control.csproj` — added `KeybedControl.cs` and `KeymapLayoutTabView.cs`
 
-### Files changed
-- `src/UI/KeybedControl.cs` (new)
-- `src/UI/KeymapLayoutTabView.cs` (new)
-- `src/UI/MidiSettingsView.cs` (unchanged — still only on Settings tab)
+#### Chunk C — Shared keymap selection (Settings ↔ Layout tabs)
+- `Module.cs` — Added `SelectedKeymapChanged` event (raised from `SelectKeymap` and `ReloadKeymaps` fallback)
+- `MidiSettingsView` — Subscribes to `SelectedKeymapChanged`, syncs dropdown when the active keymap changes externally (with recursion guard)
+- `KeymapLayoutTabView` — Selecting a keymap now calls `_module.SelectKeymap()`, syncing the active keymap. Also subscribes to `SelectedKeymapChanged` to reflect external changes. Refactored `UpdatePreview()` to avoid re-setting the active keymap on initial load.
+
+#### Keybed rendering fixes
+- **`KeybedControl` invisible / clipped bug** — `Paint` receives local bounds (origin 0,0), but `Control.Draw`'s `SpriteBatch` is in screen-space with no implicit offset. Added `bounds.Offset(this.AbsoluteBounds.X, this.AbsoluteBounds.Y)` at the top of `Paint` so drawing uses screen coordinates matching the scissor rectangle.
+- **`Layout` setter missing `Invalidate()`** — Added `Invalidate()` so the control re-renders when the keymap changes.
+
+#### Fixed key widths with horizontal scrolling
+- `KeybedControl` — Constant 24px white-key width (no dynamic squeezing). Control width computed as `whiteKeyCount * WhiteKeyWidth + padding`.
+- Height fixed at 96px (compact, roughly half the previous 180px).
+- `KeymapLayoutTabView` — Wraps `KeybedControl` in a `Panel` (420×104 viewport). Added a `TrackBar` underneath that drives `Panel.HorizontalScrollOffset` so wide keymaps are panned left/right rather than squeezed.
+- Scrollbar range auto-adjusts per keymap: `max(0, keybedWidth - 420)`.
+
+#### Layout overlap fix
+- Info label in `KeymapLayoutTabView` changed from `AutoSizeHeight = true` to fixed `Height = 20` to prevent it from growing downward into the keybed panel.
+
+### Files changed this session
 - `Module.cs`
-- `Blish HUD - MIDI Control.csproj`
+- `src/UI/MidiSettingsView.cs`
+- `src/UI/KeymapLayoutTabView.cs`
+- `src/UI/KeybedControl.cs`
+
+### Tests
+- 253 passed, 5 failed (all pre-existing `KeymapRegistryTests`: count mismatches + `Newtonsoft.Json FileNotFoundException`). No new regressions.
 
 ### Outstanding / Follow-up
-- **25 pre-existing `KeymapRegistryTests` failures**: these error with `FileNotFoundException` for `Blish HUD.dll` because the assembly reference in the main `.csproj` has `<Private>False</Private>`, so Blish HUD dependencies are not copied to the test output directory. Fixing this copy-local behavior is out of scope for the keybed feature but should be addressed so the full test suite is green.
-- **Potential visual refinements**: key labels on very narrow keys may overflow; consider reducing font size or showing labels only on white keys. Consider adding note name labels beneath keys (e.g., "C3"). Consider a scrollbar or horizontal overflow for keymaps spanning many octaves.
-- **Mouse interaction**: hover/select feedback on keys, click-to-preview-sound (future), or click-to-see-note-details tooltip.
-- **Settings ↔ Layout tab sync**: currently independent. Consider whether selecting a keymap on the Layout tab should optionally sync back to the active keymap.
+- **25 pre-existing `KeymapRegistryTests` failures** — `Newtonsoft.Json` `FileNotFoundException` because the assembly reference in the main `.csproj` has `<Private>False</Private>`, so Blish HUD dependencies are not copied to the test output directory. Fixing this copy-local behavior is out of scope for the keybed feature but should be addressed so the full test suite is green.
+- **Visual refinements**: static note-name labels (e.g. "C3" beneath keys), key hover highlighting, click-to-tooltip with note details.
+- **Key labels on narrow black keys** may overflow — consider reducing font size or not showing key on black keys.
+- **Window width auto-sizing** to fit the full keybed without scrolling (alternative to the TrackBar approach).

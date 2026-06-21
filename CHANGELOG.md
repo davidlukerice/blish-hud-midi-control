@@ -3,12 +3,18 @@
 ## [Unreleased] — v0.2.0
 
 ### Added
+- **Keybed Layout Preview** — New "Keymap Layout" tab in the settings window shows a visual piano-key rendering of any selected keymap.
+  - White and black keys rendered as a scrollable keybed with constant 24px key widths.
+  - Mapped keys show their GW2 key label; key-switch notes (octave shift) get an orange border.
+  - Horizontal scrolling via a `TrackBar` for keymaps that span many octaves (e.g. Ornate Grand Piano).
+  - Selecting a keymap on the Layout tab syncs to the active playing keymap, and vice versa.
 - **Key Hold mode** — New "Enable Key Hold" toggle in settings. When on, MIDI note-on sends a key-down and note-off sends a key-up, so GW2 keys are held for the duration the MIDI note is held. Key Tap mode (down+up per note) remains the default. Includes a "Release All Keys" panic button to recover stuck keys.
-- **Black Lion Drum built-in keymap** — `black-lion-drum`. Maps 15 MIDI notes (`C4`–`E5`) to the Black Lion Drum set Chair's 15 sounds. Cymbals on black keys (`C#4`→F1 Crash, `D#4`→F2 Ride, `F#4`→F4 Hi-Hat Closed, `G#4`→F4 Hi-Hat Open, `A#4`→F5 Hi-Hat Foot); drums on white keys (`C4`/`D4`→1/2 Bass, `E4`/`F4`→4/4 Snare, `G4`→5 Cross Stick, `A4`/`B4`→6/7 Ghost, `C5`/`D5`/`E5`→8/9/0 Toms). No octave swapping.
+- **Black Lion Drum built-in keymap** — `black-lion-drum`. Maps 15 MIDI notes (`C4`–`E5`) to the Black Lion Drum set Chair's 15 sounds. See in-game keymap layout for full mapping.
 - **Frame Drum (Auto) built-in keymap** — `frame-drum-auto`. Maps MIDI notes `C4`–`E4` to the Frame Drum's five percussion sounds on keys `1`–`5`. No octave swapping (the instrument has no octaves).
 - **GW2 gameplay sample keymaps** — Three custom keymaps for non-musical GW2 gameplay: `gw2-gameplay-25key`, `gw2-gameplay-37key`, and `gw2-gameplay-49key`. See `sample-keymaps/README.md` for details.
 
 ### Fixed
+- **Settings ↔ Layout tab keymap sync** — Changing the keymap on either tab now updates the other and the active playing keymap.
 - **Settings UI sync on corner icon right-click** — The settings panel now correctly reflects the `Send Notes` toggle state when it is toggled via right-click on the corner icon.
 
 ## [0.1.0] – 2026-05-31

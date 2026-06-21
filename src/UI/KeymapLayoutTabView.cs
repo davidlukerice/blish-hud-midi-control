@@ -22,6 +22,8 @@ namespace DavidRice.BlishHud.MidiControl.UI
 
         private readonly MidiModule _module;
         private KeybedControl? _keybedControl;
+        private Panel? _keybedPanel;
+        private TrackBar? _scrollTrackBar;
         private Dropdown? _keymapDropdown;
         private Label? _keymapInfoLabel;
 
@@ -76,20 +78,38 @@ namespace DavidRice.BlishHud.MidiControl.UI
                 Parent = buildPanel,
                 Text = "",
                 Location = new Point(x, y),
-                AutoSizeHeight = true,
+                Height = 20,
+                AutoSizeHeight = false,
                 AutoSizeWidth = true,
                 TextColor = Color.Gray,
             };
-            y += _keymapInfoLabel.Height + 8;
+            y += 28;
 
             // ---- Keybed preview ----
-            _keybedControl = new KeybedControl
+            _keybedPanel = new Panel
             {
                 Parent = buildPanel,
                 Location = new Point(x, y),
-                Size = new Point(420, 180),
+                Size = new Point(420, 104),
+            };
+
+            _keybedControl = new KeybedControl
+            {
+                Parent = _keybedPanel,
+                Location = new Point(0, 0),
                 Layout = KeybedLayout.Empty,
             };
+
+            _scrollTrackBar = new TrackBar
+            {
+                Parent = buildPanel,
+                Location = new Point(x, y + _keybedPanel.Height + 4),
+                Size = new Point(420, 20),
+                MinValue = 0,
+                MaxValue = 0,
+                Value = 0,
+            };
+            _scrollTrackBar.ValueChanged += OnScrollValueChanged;
 
             PopulateDropdown();
             _module.SelectedKeymapChanged += OnSelectedKeymapChanged;
@@ -125,6 +145,12 @@ namespace DavidRice.BlishHud.MidiControl.UI
                 var initialKeymap = _module.AvailableKeymaps.FirstOrDefault(k => k.Name == _keymapDropdown.SelectedItem);
                 UpdatePreview(initialKeymap);
             }
+        }
+
+        private void OnScrollValueChanged(object? sender, EventArgs e)
+        {
+            if (_keybedPanel != null && _scrollTrackBar != null)
+                _keybedPanel.HorizontalScrollOffset = (int)_scrollTrackBar.Value;
         }
 
         private void OnSelectedKeymapChanged(string keymapId)
@@ -171,6 +197,7 @@ namespace DavidRice.BlishHud.MidiControl.UI
                     _keybedControl.Layout = KeybedLayout.Empty;
                 if (_keymapInfoLabel != null)
                     _keymapInfoLabel.Text = "";
+                UpdateScrollBar();
                 return;
             }
 
@@ -186,6 +213,20 @@ namespace DavidRice.BlishHud.MidiControl.UI
                     : $"Octaves {layout.StartOctave}–{layout.EndOctave}  |  empty";
                 _keymapInfoLabel.Text = info;
             }
+
+            UpdateScrollBar();
+        }
+
+        private void UpdateScrollBar()
+        {
+            if (_keybedPanel == null || _scrollTrackBar == null || _keybedControl == null) return;
+
+            int maxScroll = Math.Max(0, _keybedControl.Width - _keybedPanel.Width);
+            _scrollTrackBar.ValueChanged -= OnScrollValueChanged;
+            _scrollTrackBar.MaxValue = maxScroll;
+            _scrollTrackBar.Value = 0;
+            _scrollTrackBar.ValueChanged += OnScrollValueChanged;
+            _keybedPanel.HorizontalScrollOffset = 0;
         }
     }
 }
