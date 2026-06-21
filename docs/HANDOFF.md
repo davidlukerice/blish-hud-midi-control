@@ -27,39 +27,27 @@ See [`docs/design-decisions.md`](design-decisions.md) for the historical record 
 
 ---
 
-## Current Session — Keybed Layout Preview — Chunk C & Key Rendering Fixes
+## Current Session — Keybed Note Labels — Chunk D
 
 ### What was done
 
-#### Chunk C — Shared keymap selection (Settings ↔ Layout tabs)
-- `Module.cs` — Added `SelectedKeymapChanged` event (raised from `SelectKeymap` and `ReloadKeymaps` fallback)
-- `MidiSettingsView` — Subscribes to `SelectedKeymapChanged`, syncs dropdown when the active keymap changes externally (with recursion guard)
-- `KeymapLayoutTabView` — Selecting a keymap now calls `_module.SelectKeymap()`, syncing the active keymap. Also subscribes to `SelectedKeymapChanged` to reflect external changes. Refactored `UpdatePreview()` to avoid re-setting the active keymap on initial load.
+- `KeybedControl` — Only **C notes** show octave reference labels (e.g. "C3", "C4"), rendered **below** the keybed rather than inside keys.
+  - Added `NoteLabelHeight = 14` and increased `DefaultHeight` from 96 → 110 to accommodate the label row.
+  - Key drawing area is now `bounds.Height - KeyPadding * 2 - NoteLabelHeight`.
+  - GW2 key label moved back to the **lower 45%** of the white key (as originally designed).
+  - C note labels are rendered in a third pass at `y + keyAreaHeight + 2`, centered under each C key in `Color.LightGray` (was `Color.Gray`).
+  - Black keys remain unchanged (GW2 key centered, no note name).
+- `KeymapLayoutTabView` — Increased keybed panel height from 104 → 118 to fit the taller `KeybedControl`. Info label (`"Octaves n–m | x mapped notes"`) color changed from `Color.Gray` to `Color.LightGray`. Scrollbar auto-adjusts via `y + _keybedPanel.Height + 4`.
 
-#### Keybed rendering fixes
-- **`KeybedControl` invisible / clipped bug** — `Paint` receives local bounds (origin 0,0), but `Control.Draw`'s `SpriteBatch` is in screen-space with no implicit offset. Added `bounds.Offset(this.AbsoluteBounds.X, this.AbsoluteBounds.Y)` at the top of `Paint` so drawing uses screen coordinates matching the scissor rectangle.
-- **`Layout` setter missing `Invalidate()`** — Added `Invalidate()` so the control re-renders when the keymap changes.
-
-#### Fixed key widths with horizontal scrolling
-- `KeybedControl` — Constant 24px white-key width (no dynamic squeezing). Control width computed as `whiteKeyCount * WhiteKeyWidth + padding`.
-- Height fixed at 96px (compact, roughly half the previous 180px).
-- `KeymapLayoutTabView` — Wraps `KeybedControl` in a `Panel` (420×104 viewport). Added a `TrackBar` underneath that drives `Panel.HorizontalScrollOffset` so wide keymaps are panned left/right rather than squeezed.
-- Scrollbar range auto-adjusts per keymap: `max(0, keybedWidth - 420)`.
-
-#### Layout overlap fix
-- Info label in `KeymapLayoutTabView` changed from `AutoSizeHeight = true` to fixed `Height = 20` to prevent it from growing downward into the keybed panel.
-
-### Files changed this session
-- `Module.cs`
-- `src/UI/MidiSettingsView.cs`
-- `src/UI/KeymapLayoutTabView.cs`
+### Files changed
 - `src/UI/KeybedControl.cs`
+- `src/UI/KeymapLayoutTabView.cs`
 
-### Tests
-- 253 passed, 5 failed (all pre-existing `KeymapRegistryTests`: count mismatches + `Newtonsoft.Json FileNotFoundException`). No new regressions.
+### Build / Tests
+- Build: success (0 errors, 1 pre-existing warning).
+- No new regressions.
 
 ### Outstanding / Follow-up
-- **25 pre-existing `KeymapRegistryTests` failures** — `Newtonsoft.Json` `FileNotFoundException` because the assembly reference in the main `.csproj` has `<Private>False</Private>`, so Blish HUD dependencies are not copied to the test output directory. Fixing this copy-local behavior is out of scope for the keybed feature but should be addressed so the full test suite is green.
-- **Visual refinements**: static note-name labels (e.g. "C3" beneath keys), key hover highlighting, click-to-tooltip with note details.
-- **Key labels on narrow black keys** may overflow — consider reducing font size or not showing key on black keys.
+- **25 pre-existing `KeymapRegistryTests` failures** — `Newtonsoft.Json` `FileNotFoundException` because the assembly reference in the main `.csproj` has `<Private>False</Private>`, so Blish HUD dependencies are not copied to the test output directory.
+- **Key hover highlighting** and **click-to-tooltip** with note details.
 - **Window width auto-sizing** to fit the full keybed without scrolling (alternative to the TrackBar approach).

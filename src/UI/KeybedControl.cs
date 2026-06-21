@@ -21,7 +21,8 @@ namespace DavidRice.BlishHud.MidiControl.UI
         private const int WhiteKeyWidth = 24;
         private const int KeyPadding = 4;
         private const int DefaultWidth = 420;
-        private const int DefaultHeight = 96;
+        private const int NoteLabelHeight = 14;
+        private const int DefaultHeight = 110;
 
         private KeybedLayout _layout = KeybedLayout.Empty;
         private static Texture2D? _pixelTexture;
@@ -88,13 +89,14 @@ namespace DavidRice.BlishHud.MidiControl.UI
             if (whiteKeyCount == 0) return;
 
             int availableWidth = bounds.Width - KeyPadding * 2;
-            int availableHeight = bounds.Height - KeyPadding * 2;
+            int availableHeight = bounds.Height - KeyPadding * 2 - NoteLabelHeight;
             float whiteKeyWidth = availableWidth / (float)whiteKeyCount;
             float blackKeyWidth = whiteKeyWidth * 0.65f;
             int whiteKeyHeight = availableHeight;
             int blackKeyHeight = (int)(availableHeight * 0.6f);
 
             var whiteKeyRects = new Dictionary<int, Rectangle>();
+            var cNoteRects = new List<(string NoteName, Rectangle Rect)>();
             float x = bounds.X + KeyPadding;
             int y = bounds.Y + KeyPadding;
 
@@ -105,6 +107,9 @@ namespace DavidRice.BlishHud.MidiControl.UI
 
                 var rect = new Rectangle((int)x, y, (int)whiteKeyWidth, whiteKeyHeight);
                 whiteKeyRects[key.NoteNumber] = rect;
+
+                if (key.NoteNumber % 12 == 0)
+                    cNoteRects.Add((key.NoteName, rect));
 
                 Color fillColor = key.IsMapped
                     ? Color.FromNonPremultiplied(245, 245, 245, 255)
@@ -118,7 +123,8 @@ namespace DavidRice.BlishHud.MidiControl.UI
 
                 if (key.IsMapped && key.Gw2Key != null)
                 {
-                    DrawCenteredString(spriteBatch, font, key.Gw2Key, rect, Color.Black);
+                    var gw2Rect = new Rectangle(rect.X, rect.Y + (int)(rect.Height * 0.55f), rect.Width, (int)(rect.Height * 0.45f));
+                    DrawCenteredString(spriteBatch, font, key.Gw2Key, gw2Rect, Color.Black);
                 }
 
                 x += whiteKeyWidth;
@@ -150,6 +156,14 @@ namespace DavidRice.BlishHud.MidiControl.UI
                 {
                     DrawCenteredString(spriteBatch, font, key.Gw2Key, rect, Color.White);
                 }
+            }
+
+            // Third pass: C note labels below the keys (octave reference)
+            int labelY = bounds.Y + KeyPadding + availableHeight + 2;
+            foreach (var (noteName, rect) in cNoteRects)
+            {
+                var labelRect = new Rectangle(rect.X, labelY, rect.Width, NoteLabelHeight - 2);
+                DrawCenteredString(spriteBatch, font, noteName, labelRect, Color.LightGray);
             }
         }
 

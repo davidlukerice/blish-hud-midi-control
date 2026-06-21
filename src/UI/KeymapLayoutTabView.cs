@@ -81,7 +81,7 @@ namespace DavidRice.BlishHud.MidiControl.UI
                 Height = 20,
                 AutoSizeHeight = false,
                 AutoSizeWidth = true,
-                TextColor = Color.Gray,
+                TextColor = Color.LightGray,
             };
             y += 28;
 
@@ -90,7 +90,7 @@ namespace DavidRice.BlishHud.MidiControl.UI
             {
                 Parent = buildPanel,
                 Location = new Point(x, y),
-                Size = new Point(420, 104),
+                Size = new Point(420, 118),
             };
 
             _keybedControl = new KeybedControl
