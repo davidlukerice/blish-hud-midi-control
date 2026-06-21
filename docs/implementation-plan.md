@@ -72,8 +72,12 @@ Rules:
 
 - [x] Frame Drum Auto keymap (added in v0.2.0)
 - [x] Keybed Layout Preview (added in v0.2.0 — see `docs/keybed-layout-preview-plan.md`)
-- [ ] Drum Kit keymap with MIDI drum note mapping
 - [x] `noteoff` support / true key-down key-up hold behavior (Key Hold mode — v0.2.0)
+- [ ] Drum Kit keymap with MIDI drum note mapping
 - [ ] Floating overlay indicator showing last played note (outside settings tab)
 - [ ] Chord support (multi-key bindings per note)
 - [ ] Better handling of 'extra' keys that activate loops, recording, or chords
+- [ ] Visual legend for mapped/key-switch/unmapped colors in the keybed preview
+- [ ] Custom keymap generation from the keybed
+- [ ] Clicking a key in the visualization to send it to the game
+- [ ] Unify note-name parsing between `KeybedLayoutCalculator` and `KeymapPreviewFormatter`

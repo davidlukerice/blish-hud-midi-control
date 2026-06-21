@@ -6,6 +6,8 @@
 - 🔄 **Auto octave swap** — Automatically shifts octaves (`9`/`0`) when you play outside the current range, with configurable delay for multi-octave jumps
 - 🔁 **Auto-reconnect** — Detects disconnects and retries every 10 seconds until your device returns
 - 🎛️ **Live keymap preview** — See note-to-key mappings and a real-time "Recent Sends" log in the settings panel
+- 🎹 **Keybed Layout Preview** — Visual piano-keybed rendering of any selected keymap with mapped-key labels, octave-shift borders, hover tooltips, and C-note octave labels
+- 🔒 **Key Hold mode** — Optional key-down/key-up hold behavior for sustained notes, with a "Release All Keys" panic button
 - 🔇 **Toggle keybind** — Global hotkey to instantly mute/unmute note sending
 - 🛡️ **Focus guard** — Optionally blocks keypresses when GW2 is not the active window
 
@@ -20,5 +22,7 @@
 - Lute (Auto)
 - The Minstrel (Auto & Manual)
 - Verdarach (Auto)
+- Black Lion Drum
+- Frame Drum (Auto)
 
 <img width="1262" height="640" alt="repo image" src="https://github.com/user-attachments/assets/46023f7b-3e0a-474e-9931-d8b0d45fdd18" />

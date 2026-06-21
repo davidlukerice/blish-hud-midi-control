@@ -1,13 +1,11 @@
 # Changelog
 
-## [Unreleased] — v0.2.0
+## [Unreleased]
+
+## [0.2.0] – 2026-06-20
 
 ### Added
 - **Keybed Layout Preview** — New "Keymap Layout" tab in the settings window shows a visual piano-key rendering of any selected keymap.
-  - White and black keys rendered as a scrollable keybed with constant 24px key widths.
-  - Mapped keys show their GW2 key label; key-switch notes (octave shift) get an orange border.
-  - Horizontal scrolling via a `TrackBar` for keymaps that span many octaves (e.g. Ornate Grand Piano).
-  - Selecting a keymap on the Layout tab syncs to the active playing keymap, and vice versa.
 - **Key Hold mode** — New "Enable Key Hold" toggle in settings. When on, MIDI note-on sends a key-down and note-off sends a key-up, so GW2 keys are held for the duration the MIDI note is held. Key Tap mode (down+up per note) remains the default. Includes a "Release All Keys" panic button to recover stuck keys.
 - **Black Lion Drum built-in keymap** — `black-lion-drum`. Maps 15 MIDI notes (`C4`–`E5`) to the Black Lion Drum set Chair's 15 sounds. See in-game keymap layout for full mapping.
 - **Frame Drum (Auto) built-in keymap** — `frame-drum-auto`. Maps MIDI notes `C4`–`E4` to the Frame Drum's five percussion sounds on keys `1`–`5`. No octave swapping (the instrument has no octaves).

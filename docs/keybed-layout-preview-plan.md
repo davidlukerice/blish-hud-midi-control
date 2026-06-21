@@ -42,7 +42,7 @@ Non-domain design decisions captured during this session:
 - `KeymapLayoutTabView` subscribes to `SelectedKeymapChanged` to sync from Settings tab.
 - Event unsubscribe on `DoUnload` / `Unload`.
 
-### Chunk D — Tooltips, C markers, edge cases, and polish
+### Chunk D — Tooltips, C markers, edge cases, and polish ✅
 
 **Goal**: Add interactive details and handle edge cases.
 
@@ -65,7 +65,9 @@ Non-domain design decisions captured during this session:
 
 **Dependencies**: Chunk C must be complete.
 
-## Follow-ups (out of scope for this feature chunk)
+## Follow-ups
+
+These remain out of scope and have been moved to the project [Unreleased] backlog:
 
 - Visual legend for mapped/key-switch/unmapped colors.
 - Custom keymap generation from the keybed.

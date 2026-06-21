@@ -8,7 +8,8 @@ A Blish HUD module that maps MIDI controller input to keyboard keypresses for pl
 |------|------------|
 | **Blish HUD** | A .NET Framework overlay framework for Guild Wars 2. The module runs as a separate process and renders over the game window. Chosen over Nexus (a C++ injected proxy) because the module requires direct, low-latency arbitrary key sending (`SendInput`) rather than gamebind-based input. |
 | **Keymap** | A mapping from MIDI note names (e.g. `C3`, `D#4`) to GW2 keyboard keys (e.g. `1`, `2`, `9`, `0`), plus octave shift bindings. A keymap also defines which relative octaves each note belongs to, used by the auto-octave-swap feature. |
-| **Keybed Layout Preview** | A read-only visual piano-key representation of a keymap's note-to-key mappings, shown on the Keymap Layout settings tab. |
+| **Keybed Layout Preview** | An interactive visual piano-key representation of a keymap's note-to-key mappings, shown on the Keymap Layout settings tab. Includes hover highlights and native tooltips per key. |
+| **Keybed Control** | A custom Blish HUD `Control` that renders a `KeybedLayout` as an interactive piano-key keyboard, including mapped-key labels, octave-shift borders, hover highlighting, and tooltips. |
 | **Keymap Layout Tab** | A settings tab that hosts the Keybed Layout Preview and allows selection of which keymap to visualize. |
 | **Auto Octave Swap** | When enabled, the module tracks the current relative octave. If an incoming MIDI note is in a different octave, the module automatically sends the octave-shift key (`9` or `0`) before sending the note key. A configurable delay is added when shifting multiple octaves to account for GW2 input latency. |
 | **Relative Octave** | The currently active octave within a GW2 instrument, represented as a 0-indexed integer (e.g. 0 = lowest, 1 = middle, 2 = highest). The module maintains this state internally. |
