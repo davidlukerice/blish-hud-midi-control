@@ -2,8 +2,10 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Blish_HUD;
 using Blish_HUD.Controls;
+using Blish_HUD.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended.BitmapFonts;
@@ -25,6 +27,8 @@ namespace DavidRice.BlishHud.MidiControl.UI
         private const int DefaultHeight = 110;
 
         private KeybedLayout _layout = KeybedLayout.Empty;
+        private KeybedKey? _hoveredKey;
+        private readonly Dictionary<int, Rectangle> _keyRects = new Dictionary<int, Rectangle>();
         private static Texture2D? _pixelTexture;
 
         public KeybedControl()
@@ -51,7 +55,119 @@ namespace DavidRice.BlishHud.MidiControl.UI
                     Size = new Point(desiredWidth, DefaultHeight);
                 }
 
+                RebuildKeyRects();
                 Invalidate();
+            }
+        }
+
+        protected override void OnMouseMoved(MouseEventArgs e)
+        {
+            base.OnMouseMoved(e);
+            UpdateHoveredKey();
+        }
+
+        protected override void OnMouseEntered(MouseEventArgs e)
+        {
+            base.OnMouseEntered(e);
+            UpdateHoveredKey();
+        }
+
+        protected override void OnMouseLeft(MouseEventArgs e)
+        {
+            base.OnMouseLeft(e);
+            if (_hoveredKey != null)
+            {
+                _hoveredKey = null;
+                BasicTooltipText = "";
+                Invalidate();
+            }
+        }
+
+        private void UpdateHoveredKey()
+        {
+            KeybedKey? newHover = null;
+            var mousePos = this.RelativeMousePosition;
+
+            foreach (var key in _layout.Keys)
+            {
+                if (!_keyRects.TryGetValue(key.NoteNumber, out var rect))
+                    continue;
+
+                if (rect.Contains(mousePos))
+                {
+                    newHover = key;
+                    break;
+                }
+            }
+
+            if (_hoveredKey?.NoteNumber != newHover?.NoteNumber)
+            {
+                _hoveredKey = newHover;
+                BasicTooltipText = BuildTooltipText(newHover);
+                Invalidate();
+            }
+        }
+
+        private static string BuildTooltipText(KeybedKey? key)
+        {
+            if (key == null) return "";
+
+            if (!key.IsMapped)
+                return $"{key.NoteName} (unmapped)";
+
+            if (key.IsKeySwitch)
+                return $"{key.NoteName}\r\nOctave shift (Key: {key.Gw2Key})";
+
+            var sb = new StringBuilder();
+            sb.AppendLine(key.NoteName);
+            sb.AppendLine($"GW2 Key: {key.Gw2Key}");
+            if (key.Octave.HasValue)
+                sb.AppendLine($"Octave: {key.Octave.Value}");
+
+            if (key.HasAltOctave && key.AltOctave.HasValue && !string.IsNullOrEmpty(key.AltOctaveKey))
+                sb.AppendLine($"Also plays as {key.AltOctaveKey} on octave {key.AltOctave.Value}");
+
+            return sb.ToString().TrimEnd();
+        }
+
+        private void RebuildKeyRects()
+        {
+            _keyRects.Clear();
+            if (_layout.IsEmpty) return;
+
+            int whiteKeyCount = _layout.Keys.Count(k => !k.IsBlackKey);
+            float whiteKeyWidth = WhiteKeyWidth;
+            float blackKeyWidth = whiteKeyWidth * 0.65f;
+            int availableHeight = DefaultHeight - KeyPadding * 2 - NoteLabelHeight;
+            int whiteKeyHeight = availableHeight;
+            int blackKeyHeight = (int)(availableHeight * 0.6f);
+
+            float x = KeyPadding;
+            int y = KeyPadding;
+
+            var whiteRects = new Dictionary<int, Rectangle>();
+
+            foreach (var key in _layout.Keys)
+            {
+                if (key.IsBlackKey) continue;
+                var rect = new Rectangle((int)x, y, (int)whiteKeyWidth, whiteKeyHeight);
+                _keyRects[key.NoteNumber] = rect;
+                whiteRects[key.NoteNumber] = rect;
+                x += whiteKeyWidth;
+            }
+
+            foreach (var key in _layout.Keys)
+            {
+                if (!key.IsBlackKey) continue;
+                int preceding = GetPrecedingWhiteKeyIndex(key.NoteNumber % 12);
+                if (preceding < 0) continue;
+
+                int prevNote = key.NoteNumber - 1;
+                if (!whiteRects.TryGetValue(prevNote, out var prevRect)) continue;
+
+                float blackX = prevRect.Right - blackKeyWidth / 2f;
+                var rect = new Rectangle((int)blackX, y, (int)blackKeyWidth, blackKeyHeight);
+                _keyRects[key.NoteNumber] = rect;
             }
         }
 
@@ -81,7 +197,7 @@ namespace DavidRice.BlishHud.MidiControl.UI
             spriteBatch.DrawString(font, text, new Vector2(x, y), Color.Gray);
         }
 
-        private static void DrawKeys(SpriteBatch spriteBatch, Rectangle bounds, KeybedLayout layout)
+        private static void DrawKeys(SpriteBatch spriteBatch, Rectangle bounds, KeybedLayout layout, KeybedKey? hoveredKey, Dictionary<int, Rectangle> keyRects)
         {
             var font = GameService.Content.DefaultFont12;
 
@@ -158,7 +274,22 @@ namespace DavidRice.BlishHud.MidiControl.UI
                 }
             }
 
-            // Third pass: C note labels below the keys (octave reference)
+            // Third pass: hover highlight overlay
+            if (hoveredKey != null && keyRects.TryGetValue(hoveredKey.NoteNumber, out var hoverLocalRect))
+            {
+                var hoverScreenRect = new Rectangle(
+                    bounds.X + KeyPadding + hoverLocalRect.X - KeyPadding,
+                    bounds.Y + KeyPadding + hoverLocalRect.Y - KeyPadding,
+                    hoverLocalRect.Width,
+                    hoverLocalRect.Height);
+
+                var tint = hoveredKey.IsMapped
+                    ? new Color(255, 165, 0, 77)
+                    : new Color(176, 196, 222, 77);
+                DrawFilledRect(spriteBatch, hoverScreenRect, tint);
+            }
+
+            // Fourth pass: C note labels below the keys (octave reference)
             int labelY = bounds.Y + KeyPadding + availableHeight + 2;
             foreach (var (noteName, rect) in cNoteRects)
             {
@@ -169,7 +300,7 @@ namespace DavidRice.BlishHud.MidiControl.UI
 
         private void DrawKeys(SpriteBatch spriteBatch, Rectangle bounds)
         {
-            DrawKeys(spriteBatch, bounds, _layout);
+            DrawKeys(spriteBatch, bounds, _layout, _hoveredKey, _keyRects);
         }
 
         private static int GetPrecedingWhiteKeyIndex(int semitone) => semitone switch

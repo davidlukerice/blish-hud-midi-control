@@ -27,27 +27,30 @@ See [`docs/design-decisions.md`](design-decisions.md) for the historical record 
 
 ---
 
-## Current Session — Keybed Note Labels — Chunk D
+## Current Session — Keybed Hover Highlight + Tooltip — Chunk E
 
 ### What was done
 
-- `KeybedControl` — Only **C notes** show octave reference labels (e.g. "C3", "C4"), rendered **below** the keybed rather than inside keys.
-  - Added `NoteLabelHeight = 14` and increased `DefaultHeight` from 96 → 110 to accommodate the label row.
-  - Key drawing area is now `bounds.Height - KeyPadding * 2 - NoteLabelHeight`.
-  - GW2 key label moved back to the **lower 45%** of the white key (as originally designed).
-  - C note labels are rendered in a third pass at `y + keyAreaHeight + 2`, centered under each C key in `Color.LightGray` (was `Color.Gray`).
-  - Black keys remain unchanged (GW2 key centered, no note name).
-- `KeymapLayoutTabView` — Increased keybed panel height from 104 → 118 to fit the taller `KeybedControl`. Info label (`"Octaves n–m | x mapped notes"`) color changed from `Color.Gray` to `Color.LightGray`. Scrollbar auto-adjusts via `y + _keybedPanel.Height + 4`.
+- `KeybedControl` — Added **hover highlighting** and **native tooltip** support:
+  - Tracks `_hoveredKey` by overriding `OnMouseMoved`, `OnMouseEntered`, `OnMouseLeft`.
+  - Uses `RelativeMousePosition` (Blish HUD scroll-aware) to detect which key rect the cursor is over.
+  - `_keyRects` dictionary rebuilt on `Layout` change for fast hit-testing.
+  - **Hover overlay**: semi-transparent orange tint (`Color(255,165,0,77)`) for mapped keys, blue-gray (`Color(176,196,222,77)`) for unmapped — drawn in a third pass *after* keys.
+  - **Native tooltip** (`BasicTooltipText`) updated dynamically per key, floats above all controls, follows cursor via Blish HUD's tooltip system.
+  - **Tooltip content**:
+    - Unmapped: `C#4 (unmapped)`
+    - Mapped: `C4\r\nGW2 Key: 1\r\nOctave: 1`
+    - Alt octave: appends `Also plays as 8 on octave 0`
+    - Key switch: `C4\r\nOctave shift (Key: 9)`
+  - Added `using Blish_HUD.Input;` for `MouseEventArgs`.
 
 ### Files changed
 - `src/UI/KeybedControl.cs`
-- `src/UI/KeymapLayoutTabView.cs`
 
 ### Build / Tests
 - Build: success (0 errors, 1 pre-existing warning).
 - No new regressions.
 
 ### Outstanding / Follow-up
-- **25 pre-existing `KeymapRegistryTests` failures** — `Newtonsoft.Json` `FileNotFoundException` because the assembly reference in the main `.csproj` has `<Private>False</Private>`, so Blish HUD dependencies are not copied to the test output directory.
-- **Key hover highlighting** and **click-to-tooltip** with note details.
-- **Window width auto-sizing** to fit the full keybed without scrolling (alternative to the TrackBar approach).
+- **25 pre-existing `KeymapRegistryTests` failures** — `Newtonsoft.Json` `FileNotFoundException` (copy-local issue).
+- **Window width auto-sizing** to fit the full keybed without scrolling (alternative to TrackBar approach).
